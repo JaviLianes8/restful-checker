@@ -1,4 +1,4 @@
-# 🧪 RESTful API Checker
+# RESTful API Checker
 
 **RESTful API Checker** is a lightweight and modular Python tool that analyzes a Swagger/OpenAPI specification and validates its compliance with RESTful best practices.
 
@@ -6,7 +6,7 @@ It generates a comprehensive **HTML report** with ✅ status, 🟡 warnings, and
 
 ---
 
-## ✅ What It Checks
+## What It Checks
 
 | Category                 | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
@@ -19,7 +19,7 @@ It generates a comprehensive **HTML report** with ✅ status, 🟡 warnings, and
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 
 ```text
 restful-checker/
@@ -49,7 +49,7 @@ restful-checker/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### 1. Install dependencies
 pip install -r requirements.txt
@@ -63,10 +63,10 @@ python python/main.py json/openapi.json
 4. View the report
 Open html/rest_report.html in your browser.
 
-📄 Example Output
+Example Output
 <!-- Optional screenshot -->
 
-💡 Why Use This?
+Why Use This?
 Avoid rejections during API review
 
 Standardize APIs across teams
@@ -75,7 +75,7 @@ Improve long-term maintainability
 
 Catch inconsistencies early
 
-🔗 Resources
+Resources
 RESTful API Design
 
 OpenAPI Specification
