@@ -1,0 +1,56 @@
+body {
+    font-family: sans-serif;
+    max-width: 900px;
+    margin: auto;
+}
+
+.score {
+    background: #2ecc71;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.section {
+    margin: 20px 0;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* Color per severity level */
+.section-ok {
+    background: #eafaf1;
+}
+
+.section-warn {
+    background: #fff9e6;
+}
+
+.section-error {
+    background: #faeaea;
+}
+
+h2 {
+    border-bottom: 1px solid #ccc;
+}
+
+h3 {
+    margin-top: 1em;
+}
+
+a {
+    color: #2980b9;
+    text-decoration: none;
+}
+
+li {
+    margin: 4px 0;
+}
+
+code {
+    background: #eee;
+    padding: 1px 4px;
+    border-radius: 4px;
+}

@@ -1,0 +1,5 @@
+# HTML
+html/rest_report.html
+# Json
+json/*
+!json/.gitkeep
