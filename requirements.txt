@@ -1,1 +1,9 @@
-# No external packages needed, but keep it in case of future additions
+# Python Setup Instructions (No Virtual Environment)
+
+1. Make sure Python and pip are installed:
+   - Run: python --version
+   - Run: pip --version
+
+2. Install required packages:
+
+   pip install pyyaml
