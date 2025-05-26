@@ -1,7 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 
-def generate_html(report, score, output="../html/rest_report.html"):
+def generate_html(report, score, output=None):
+    if output is None:
+        output = Path(__file__).parent.parent / "html" / "rest_report.html"
+
     level = "Low" if score < 70 else "Acceptable" if score < 90 else "Excellent"
     color = "#e74c3c" if score < 70 else "#f39c12" if score < 90 else "#2ecc71"
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -38,4 +41,4 @@ def generate_html(report, score, output="../html/rest_report.html"):
     html += "</body></html>"
     Path(output).parent.mkdir(parents=True, exist_ok=True)
     Path(output).write_text(html, encoding='utf-8')
-    return output
+    return str(output)
