@@ -64,4 +64,4 @@ def analyze_api(path):
     })
 
     output_path = Path(__file__).parent.parent / "html" / "rest_report.html"
-    return generate_html(report, max(min(score, 100), 0))
+    return generate_html(report, max(min(score, 100), 0), output=output_path)
