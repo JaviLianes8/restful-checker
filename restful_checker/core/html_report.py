@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 def generate_html(report, score, output=None):
+    print("Using analyze_api updated")
     if output is None:
         output = Path(__file__).parent.parent / "html" / "rest_report.html"
 
