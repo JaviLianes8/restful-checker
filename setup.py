@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='restful-checker',
-    version='0.1.2',
+    version='0.1.3',
     description='Check RESTful API compliance from OpenAPI definitions and generate HTML reports',
     author='Javi Lianes',
     author_email='jlianesglr@gmail.com',
