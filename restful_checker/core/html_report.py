@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import importlib.resources
 
 def generate_html(report, score, output=None):
     print("Using analyze_api updated")
@@ -10,8 +11,10 @@ def generate_html(report, score, output=None):
     color = "#e74c3c" if score < 70 else "#f39c12" if score < 90 else "#2ecc71"
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    css_path = Path(__file__).parent.parent / "html" / "css" / "style.css"
-    inline_css = css_path.read_text(encoding='utf-8') if css_path.exists() else ""
+    try:
+        inline_css = importlib.resources.read_text("restful_checker.core.data", "style.css")
+    except Exception:
+        inline_css = "/* Failed to load CSS */"
 
     html = f"""<html><head>
     <meta charset='utf-8'>

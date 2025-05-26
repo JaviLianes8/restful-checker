@@ -55,7 +55,6 @@ def analyze_api(path):
             "items": items
         })
 
-    # Global consistency
     param_report, param_penalty = check_param_consistency(paths)
     score += param_penalty
     report.append({

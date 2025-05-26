@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='restful-checker',
-    version='0.1.15',
+    version='0.1.16',
     description='Check RESTful API compliance from OpenAPI definitions and generate HTML reports',
     author='Javi Lianes',
     author_email='jlianesglr@gmail.com',
     packages=find_packages(),
+    include_package_data=True,
     install_requires=['pyyaml'],
     entry_points={
         'console_scripts': [
