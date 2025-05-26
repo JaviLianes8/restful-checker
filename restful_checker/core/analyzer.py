@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .openapi_loader import load_openapi
 from .path_grouper import group_paths
 from .version_checker import check_versioning
@@ -16,8 +18,7 @@ def analyze_api(path):
     score = 100
 
     for base, info in resources.items():
-        items = []
-        items.append(f"<strong>Routes:</strong> {', '.join(sorted(info['raw']))}")
+        items = [f"<strong>Routes:</strong> {', '.join(sorted(info['raw']))}"]
         all_methods = sorted(info['collection'].union(info['item']))
         items.append(f"<strong>HTTP methods:</strong> {', '.join(all_methods) or 'none'}")
 
@@ -62,4 +63,5 @@ def analyze_api(path):
         "items": ["### Parameters"] + param_report
     })
 
+    output_path = Path(__file__).parent.parent / "html" / "rest_report.html"
     return generate_html(report, max(min(score, 100), 0))
