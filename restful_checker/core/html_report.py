@@ -36,5 +36,6 @@ def generate_html(report, score, output="../html/rest_report.html"):
         html += "</ul></div>"
 
     html += "</body></html>"
+    Path(output).parent.mkdir(parents=True, exist_ok=True)
     Path(output).write_text(html, encoding='utf-8')
     return output
