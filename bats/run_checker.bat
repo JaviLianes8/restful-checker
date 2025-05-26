@@ -1,5 +1,5 @@
 @echo off
-cd python
+cd ..\python
 python main.py ..\json\openapi.json
 
 echo.
