@@ -51,38 +51,33 @@ restful-checker/
 
 ## How to Run
 
-### 1. Install dependencies
-pip install -r requirements.txt
+### 
+1. Install dependencies
+	pip install -r requirements.txt
+	
 2. Add your OpenAPI file
-Drop your openapi.json or swagger.json file into the json/ folder.
+	Drop your openapi.json or swagger.json file into the json/ folder.
 
 3. Run the checker
-Double-click run_checker.bat (Windows) or run manually:
-python python/main.py json/openapi.json
+	Double-click run_checker.bat (Windows) or run manually:
+	python python/main.py json/openapi.json
 
 4. View the report
-Open html/rest_report.html in your browser.
-
-Example Output
-<!-- Optional screenshot -->
+	Open html/rest_report.html in your browser.
 
 Why Use This?
-Avoid rejections during API review
-
-Standardize APIs across teams
-
-Improve long-term maintainability
-
-Catch inconsistencies early
+	1.Avoid rejections during API review
+	2.Standardize APIs across teams
+	3.Improve long-term maintainability
+	4.Catch inconsistencies early
 
 Resources
+
 RESTful API Design
-
 OpenAPI Specification
-
 VSCode Markdown Preview
 
-📋 Requirements
+Requirements
 Python 3.8+
 
 Dependencies in requirements.txt (currently none)
