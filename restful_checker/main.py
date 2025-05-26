@@ -1,4 +1,4 @@
-from restful_checker import analyze_api
+from restful_checker.core.analyzer import analyze_api
 import sys
 
 def main():
