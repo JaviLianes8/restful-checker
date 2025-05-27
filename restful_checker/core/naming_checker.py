@@ -5,27 +5,84 @@ COMMON_VERBS = [
     "get", "create", "update", "delete", "post", "put", "fetch", "make", "do", "add"
 ]
 
-def check_naming(base_path: str):
-    issues = []
-    score_penalty = 0
+GENERIC_TERMS = {"data", "info", "object", "thing", "stuff", "item"}
+PREPOSITIONS = {"of", "for", "by", "with", "from", "to"}
 
-    segments = base_path.strip("/").split("/")
+class NamingCheckResult:
+    def __init__(self):
+        self.messages = []
+        self.has_error = False
+        self.has_warning = False
 
+    def error(self, msg):
+        self.messages.append(linkify(f"❌ {msg}", "naming"))
+        self.has_error = True
+
+    def warning(self, msg):
+        self.messages.append(linkify(f"⚠️ {msg}", "naming"))
+        self.has_warning = True
+
+    def finalize_score(self):
+        if self.has_error:
+            return -2
+        if self.has_warning:
+            return -1
+        return 0
+
+# === Individual Checks ===
+
+def check_contains_verb(segments, result):
     for segment in segments:
-        if any(re.fullmatch(rf"{verb}[a-zA-Z0-9_]*", segment, re.IGNORECASE) for verb in COMMON_VERBS):
-            issues.append(linkify(f"❌ Contains verb-like segment: `{segment}`", "naming"))
-            score_penalty -= 4
+        for verb in COMMON_VERBS:
+            if re.fullmatch(rf"{verb}[A-Za-z0-9_]*", segment, re.IGNORECASE):
+                result.error(f"Contains verb-like segment: `{segment}`")
+                break
 
-    if segments:
-        last = segments[-1]
-        if not re.search(r"s\b", last) and "{" not in last:
-            issues.append(linkify(
-                f"⚠️ Last segment `{last}` might not be plural (use plural for collections)",
-                "naming"
-            ))
-            score_penalty -= 1
+def check_last_segment_plural(segments, result):
+    if not segments:
+        return
+    last = segments[-1]
+    if "{" in last:
+        return
+    if not re.search(r"s\b", last):
+        result.warning(f"Last segment `{last}` might not be plural (use plural for collections)")
 
-    if not issues:
-        issues.append("✅ Resource naming looks RESTful")
+def check_pascal_or_camel_case(segments, result):
+    for segment in segments:
+        if re.match(r"[A-Z][a-z]+[A-Z]", segment):  # PascalCase
+            result.error(f"PascalCase not recommended in URL segment: `{segment}`")
+        elif re.match(r"[a-z]+[A-Z][a-z]+", segment):  # camelCase
+            result.error(f"camelCase not recommended in URL segment: `{segment}`")
 
-    return issues, score_penalty
+def check_contains_numbers(segments, result):
+    for segment in segments:
+        if re.search(r"[a-zA-Z]+[0-9]+", segment):
+            result.warning(f"Segment `{segment}` contains mixed alphanumeric name")
+
+def check_generic_resource_name(segments, result):
+    for segment in segments:
+        if segment.lower() in GENERIC_TERMS:
+            result.warning(f"Segment `{segment}` is too generic")
+
+def check_segment_preposition(segments, result):
+    for segment in segments:
+        if segment.lower() in PREPOSITIONS:
+            result.error(f"Segment `{segment}` looks like a preposition — not RESTful")
+
+# === Main Function ===
+
+def check_naming(base_path: str):
+    segments = base_path.strip("/").split("/")
+    result = NamingCheckResult()
+
+    check_contains_verb(segments, result)
+    check_last_segment_plural(segments, result)
+    check_pascal_or_camel_case(segments, result)
+    check_contains_numbers(segments, result)
+    check_generic_resource_name(segments, result)
+    check_segment_preposition(segments, result)
+
+    if not result.messages:
+        result.messages.append("✅ Resource naming looks RESTful")
+
+    return result.messages, result.finalize_score()

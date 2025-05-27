@@ -34,7 +34,7 @@ REST_BEST_PRACTICES = {
     "query_filters": {
         "title": "Collection Filtering",
         "type": "warning",
-        "link": "https://restfulapi.net/resource-filtering/",
+        "link": "https://spec.openapis.org/oas/v3.1.0#parameter-object",
         "summary": "Collection resources should support query filtering using ?key=value."
     }
 }
