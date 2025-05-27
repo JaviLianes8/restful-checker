@@ -7,7 +7,7 @@ import tempfile
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: restful-checker <path_to_openapi.json or URL>")
+        print("Usage: restful-checker <path_to_openapi.json or URL> ")
         sys.exit(1)
 
     path = sys.argv[1]
