@@ -2,6 +2,16 @@ from datetime import datetime
 from pathlib import Path
 import importlib.resources
 
+def render_ordered_section(messages):
+    html = ""
+    errors = [m for m in messages if m.startswith("❌")]
+    warnings = [m for m in messages if m.startswith("⚠️")]
+    others = [m for m in messages if not m.startswith(("❌", "⚠️"))]
+    for m in errors + warnings + others:
+        html += f"<li>{m}</li>"
+    html += "</ul>"
+    return html
+
 def generate_html(report, score, output=None):
     print("Using analyze_api updated")
     if output is None:
@@ -37,13 +47,25 @@ def generate_html(report, score, output=None):
             level_class = "section-warn"
             emoji = "🟡"
 
-        html += f"<div class='section {level_class}'><h2>{emoji}&nbsp;{block['title']}</h2><ul>"
+        html += f"<div class='section {level_class}'><h2>{emoji}&nbsp;{block['title']}</h2>"
+
+        current_section = None
+        section_messages = []
+
         for item in block_items:
             if item.startswith("### "):
-                html += f"</ul><h3>{item[4:]}</h3><ul>"
+                if section_messages:
+                    html += render_ordered_section(section_messages)
+                    section_messages = []
+                current_section = item[4:]
+                html += f"<h3>{current_section}</h3><ul>"
             else:
-                html += f"<li>{item}</li>"
-        html += "</ul></div>"
+                section_messages.append(item)
+
+        if section_messages:
+            html += render_ordered_section(section_messages)
+
+        html += "</div>"
 
     html += "</body></html>"
     Path(output).parent.mkdir(parents=True, exist_ok=True)
