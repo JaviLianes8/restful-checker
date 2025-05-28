@@ -53,12 +53,15 @@ html_path = analyze_api("path/to/openapi.json")
 📌 License
 MIT – Free to use and modify
 
----
+```
 
-## 🤝 Contributors
+## Contributors
 
-- [JaviLianes8](https://github.com/JaviLianes8)  
-  ![JaviLianes8](https://github.com/JaviLianes8.png?size=100)
+<a href="https://github.com/alejandrosenior">
+  <img src="https://github.com/alejandrosenior.png" width="100" alt="alejandrosenior">
+</a>
+<a href="https://github.com/JaviLianes8">
+  <img src="https://github.com/JaviLianes8.png" width="100" alt="JaviLianes8">
+</a>
 
-- [alejandrosenior](https://github.com/alejandrosenior)  
-  ![alejandrosenior](https://github.com/alejandrosenior.png?size=100)
+<p align="right">(<a href="#readme-top">volver arriba</a>)</p>
