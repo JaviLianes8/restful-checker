@@ -1,36 +1,14 @@
 import re
 from collections import defaultdict
-from .rest_docs import linkify
-
-class ParamConsistencyCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "param_consistency"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "param_consistency"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
+from restful_checker.checks.check_result import CheckResult
 
 def check_param_consistency(all_paths: dict):
-    result = ParamConsistencyCheckResult()
+    result = CheckResult("param_consistency")
     param_map = defaultdict(set)
-
     all_params = set()
 
     for path in all_paths.keys():
-        for match in re.finditer(r"\{([^}]+)\}", path):
+        for match in re.finditer(r"\{([^}]+)}", path):
             param = match.group(1)
             param_map[param.lower()].add(param)
             all_params.add(param)
@@ -51,6 +29,6 @@ def check_param_consistency(all_paths: dict):
             result.warning(f"Generic parameter name used: `{param}` — consider using more specific names")
 
     if not result.messages:
-        result.messages.append("✅ Path parameters look consistent")
+        result.success("Path parameters look consistent")
 
     return result.messages, result.finalize_score()

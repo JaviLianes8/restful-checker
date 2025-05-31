@@ -1,4 +1,4 @@
-from .rest_docs import linkify
+from restful_checker.checks.check_result import CheckResult
 
 EXPECTED_CODES = {
     "GET": {"200", "404"},
@@ -7,27 +7,6 @@ EXPECTED_CODES = {
     "DELETE": {"204", "404"},
     "PATCH": {"200", "204", "400", "404"}
 }
-
-class StatusCodeCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "status_codes"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "status_codes"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
 
 # === Individual Checks ===
 
@@ -69,7 +48,7 @@ def check_manual_5xx_usage(method, path, responses, result):
 # === Main Function ===
 
 def check_status_codes(path: str, method_map: dict):
-    result = StatusCodeCheckResult()
+    result = CheckResult("status_codes")
 
     for method, details in method_map.items():
         method_upper = method.upper()
@@ -85,6 +64,6 @@ def check_status_codes(path: str, method_map: dict):
             check_manual_5xx_usage(method_upper, path, responses, result)
 
     if not result.messages:
-        result.messages.append("✅ Status code definitions look valid")
+        result.success("Status code definitions look valid")
 
     return result.messages, result.finalize_score()

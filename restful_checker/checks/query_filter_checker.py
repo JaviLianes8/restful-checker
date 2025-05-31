@@ -1,34 +1,14 @@
 import re
-from .rest_docs import linkify
-
-class QueryFilterCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "query_filters"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "query_filters"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
+from restful_checker.checks.check_result import CheckResult
 
 # === Main Function ===
 
 def check_query_filters(path: str, methods: dict):
-    result = QueryFilterCheckResult()
+    result = CheckResult("query_filters")
 
-    if re.search(r"/\{[^}]+\}$", path):
-        return result.messages or ["✅ Skipped query filter check (single resource)"], result.finalize_score()
+    if re.search(r"/\{[^}]+}$", path):
+        result.success("Skipped query filter check (single resource)")
+        return result.messages, result.finalize_score()
 
     if "get" in methods:
         get_op = methods.get("get", {})
@@ -40,7 +20,6 @@ def check_query_filters(path: str, methods: dict):
                 f"GET collection endpoint `{path}` has no query filters — consider supporting `?filter=` or `?status=`"
             )
         else:
-            # Check if the query param names are meaningful
             useful_names = {"filter", "status", "type", "sort", "limit"}
             meaningful = any(p.get("name", "").lower() in useful_names for p in query_params)
             if not meaningful:
@@ -48,15 +27,15 @@ def check_query_filters(path: str, methods: dict):
                     f"GET {path} has query params but none look like useful filters (e.g., `filter`, `status`)"
                 )
 
-            # Optional: check for undefined or badly typed filters
             for p in query_params:
-                if "type" in p.get("schema", {}):
-                    if p["schema"]["type"] == "object":
+                schema = p.get("schema", {})
+                if "type" in schema:
+                    if schema["type"] == "object":
                         result.warning(f"Query parameter `{p.get('name')}` has type `object` — consider using primitives")
                 else:
                     result.warning(f"Query parameter `{p.get('name')}` has no defined type")
 
     if not result.messages:
-        result.messages.append("✅ Collection endpoints support query filters")
+        result.success("Collection endpoints support query filters")
 
     return result.messages, result.finalize_score()

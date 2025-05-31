@@ -1,5 +1,5 @@
 import re
-from .rest_docs import linkify
+from restful_checker.checks.check_result import CheckResult
 
 COMMON_VERBS = [
     "get", "create", "update", "delete", "post", "put", "fetch", "make", "do", "add"
@@ -7,27 +7,6 @@ COMMON_VERBS = [
 
 GENERIC_TERMS = {"data", "info", "object", "thing", "stuff", "item"}
 PREPOSITIONS = {"of", "for", "by", "with", "from", "to"}
-
-class NamingCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "naming"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "naming"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
 
 # === Individual Checks ===
 
@@ -73,7 +52,7 @@ def check_segment_preposition(segments, result):
 
 def check_naming(base_path: str):
     segments = base_path.strip("/").split("/")
-    result = NamingCheckResult()
+    result = CheckResult("naming")
 
     check_contains_verb(segments, result)
     check_last_segment_plural(segments, result)
@@ -83,6 +62,6 @@ def check_naming(base_path: str):
     check_segment_preposition(segments, result)
 
     if not result.messages:
-        result.messages.append("✅ Resource naming looks RESTful")
+        result.success("Resource naming looks RESTful")
 
     return result.messages, result.finalize_score()

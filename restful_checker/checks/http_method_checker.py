@@ -1,31 +1,10 @@
 import re
-from .rest_docs import linkify
+from restful_checker.checks.check_result import CheckResult
 
 VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH"}
 ACTIONS_FOR_GET = {"create", "update", "delete", "remove"}
 ACTIONS_FOR_POST_DELETE = {"delete", "remove"}
 ACTIONS_FOR_PUT_CREATE = {"create"}
-
-class HTTPMethodCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "http_methods"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "http_methods"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
 
 # === Individual Checks ===
 
@@ -63,19 +42,18 @@ def check_get_with_side_effect(path, method, result):
 
 def check_post_on_resource_id(path, method, result):
     if method == "POST":
-        if re.search(r"/\{[^}]+\}", path):
+        if re.search(r"/\{[^}]+}", path):
             result.warning(f"POST used with resource ID in path `{path}` — consider using PUT or PATCH")
 
 def check_delete_without_id(path, method, result):
     if method == "DELETE":
-        if not re.search(r"/\{[^}]+\}", path):
+        if not re.search(r"/\{[^}]+}", path):
             result.warning(f"DELETE without ID in path `{path}` — consider confirming if this is intentional")
-
 
 # === Main Function ===
 
 def check_http_methods(path: str, methods: set):
-    result = HTTPMethodCheckResult()
+    result = CheckResult("http_methods")
 
     for method in methods:
         check_unusual_method(method, result)
@@ -87,6 +65,6 @@ def check_http_methods(path: str, methods: set):
         check_delete_without_id(path, method, result)
 
     if not result.messages:
-        result.messages.append("✅ HTTP method usage looks valid")
+        result.success("HTTP method usage looks valid")
 
     return result.messages, result.finalize_score()

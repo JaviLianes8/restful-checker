@@ -1,10 +1,2 @@
-# HTML reports
-html/rest_report.html
-
-# JSON files (keep the .gitkeep to preserve folder)
-json/*
-!json/.gitkeep
-!json/read_before_use.txt
-
 # Python bytecode cache
 **/__pycache__/

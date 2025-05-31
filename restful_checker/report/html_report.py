@@ -17,13 +17,30 @@ def generate_html(report, score, output=None):
     if output is None:
         output = Path(__file__).parent.parent / "html" / "rest_report.html"
 
-    level = "Low" if score < 70 else "Acceptable" if score < 90 else "Excellent"
-    color = "#e74c3c" if score < 70 else "#f39c12" if score < 90 else "#2ecc71"
+    if score < 50:
+        level = "Very Low"
+        color = "#c0392b"
+    elif score < 65:
+        level = "Low"
+        color = "#e74c3c"
+    elif score < 75:
+        level = "Medium"
+        color = "#f39c12"
+    elif score < 85:
+        level = "Good"
+        color = "#f1c40f"
+    elif score < 95:
+        level = "Very Good"
+        color = "#2ecc71"
+    else:
+        level = "Excellent"
+        color = "#27ae60"
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
         inline_css = importlib.resources.read_text("restful_checker.core.data", "style.css")
-    except Exception:
+    except (FileNotFoundError, ModuleNotFoundError):
         inline_css = "/* Failed to load CSS */"
 
     html = f"""<html><head>
@@ -38,18 +55,21 @@ def generate_html(report, score, output=None):
 
     for block in report:
         block_items = block['items']
-        level_class = "section-ok"
+        block_score = block.get("score", 1.0)
         emoji = "🟢"
-        if any("❌" in item for item in block_items):
+        level_class = "section-ok"
+
+        if block_score < 0.5:
             level_class = "section-error"
             emoji = "🔴"
-        elif any("⚠️" in item for item in block_items):
+        elif block_score < 1.0:
             level_class = "section-warn"
             emoji = "🟡"
 
-        html += f"<div class='section {level_class}'><h2>{emoji}&nbsp;{block['title']}</h2>"
+        score_tag = f" <span class='score-inline'>({round(block_score * 100)}%)</span>"
 
-        current_section = None
+        html += f"<div class='section {level_class}'><h2>{emoji}&nbsp;{block['title']}{score_tag}</h2>"
+
         section_messages = []
 
         for item in block_items:

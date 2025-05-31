@@ -1,29 +1,8 @@
 import re
-from .rest_docs import linkify
+from restful_checker.checks.check_result import CheckResult
 
 VERSION_REGEX = re.compile(r"^v[0-9]+$", re.IGNORECASE)
-PARAM_REGEX = re.compile(r"\{[^}]+\}")
-
-class VersioningCheckResult:
-    def __init__(self):
-        self.messages = []
-        self.has_error = False
-        self.has_warning = False
-
-    def error(self, msg):
-        self.messages.append(linkify(f"❌ {msg}", "versioning"))
-        self.has_error = True
-
-    def warning(self, msg):
-        self.messages.append(linkify(f"⚠️ {msg}", "versioning"))
-        self.has_warning = True
-
-    def finalize_score(self):
-        if self.has_error:
-            return -2
-        if self.has_warning:
-            return -1
-        return 0
+PARAM_REGEX = re.compile(r"\{[^}]+}")
 
 # === Individual Checks ===
 
@@ -61,7 +40,7 @@ def check_resource_static_only(resource_parts, result):
 
 def check_versioning(base: str):
     parts = base.strip("/").split("/")
-    result = VersioningCheckResult()
+    result = CheckResult("versioning")
 
     version_indices = check_no_version_segment(parts, result)
     if not version_indices:
@@ -80,6 +59,6 @@ def check_versioning(base: str):
     check_resource_static_only(resource_parts, result)
 
     if not result.messages:
-        result.messages.append("✅ Versioning detected")
+        result.success("Versioning detected")
 
     return result.messages, result.finalize_score()

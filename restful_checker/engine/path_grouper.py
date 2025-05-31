@@ -5,7 +5,7 @@ def group_paths(paths):
     resources = defaultdict(lambda: {"collection": set(), "item": set(), "raw": set()})
     for path, methods in paths.items():
         raw = path
-        base = re.sub(r"\{[^}]+\}", "{id}", path).rstrip("/")
+        base = re.sub(r"\{[^}]+}", "{id}", path).rstrip("/")
         is_item = "{" in path
         for method in methods:
             resources[base]["raw"].add(raw)
