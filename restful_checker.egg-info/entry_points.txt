@@ -1,0 +1,2 @@
+[console_scripts]
+restful-checker = restful_checker.main:main

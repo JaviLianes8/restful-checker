@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: restful-checker
+Version: 0.1.24
+Summary: Check RESTful API compliance from OpenAPI definitions and generate HTML reports
+Author: Javi Lianes
+Author-email: jlianesglr@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Requires-Dist: pyyaml
+Requires-Dist: requests
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

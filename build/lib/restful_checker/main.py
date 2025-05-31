@@ -1,4 +1,4 @@
-from restful_checker.engine.analyzer import analyze_api
+from restful_checker.analyzer.analyzer import analyze_api
 from urllib.parse import urlparse
 
 import sys
