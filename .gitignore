@@ -1,8 +1,16 @@
 # Python bytecode cache
 **/__pycache__/
+__pycache__/
 
-/build/
-/dist/
+*.pyc
+*.pyo
+*.pyd
 *.egg-info/
-*.whl
-*.tar.gz
+dist/
+build/
+html/rest_report.*
+.venv/
+
+# IDE
+.vscode/
+.idea/

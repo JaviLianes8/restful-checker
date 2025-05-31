@@ -75,7 +75,6 @@ def analyze_api(path):
         items.extend(ef_msgs)
 
         for raw_path in info['raw']:
-            # Filters
             if "get" in paths.get(raw_path, {}) and not raw_path.endswith("}"):
                 f_msgs, f_score = check_query_filters(raw_path, paths.get(raw_path, {}))
                 block_score += f_score
@@ -83,14 +82,12 @@ def analyze_api(path):
                 items.append("### Filters")
                 items.extend(f_msgs)
 
-            # Pagination
             p_msgs, p_score = check_pagination(raw_path, paths.get(raw_path, {}))
             block_score += p_score
             section_count += 1
             items.append("### Pagination")
             items.extend(p_msgs)
 
-            # Resource Nesting
             nesting_msgs, nesting_score = check_resource_nesting(raw_path, paths.get(raw_path, {}))
             block_score += nesting_score
             section_count += 1
@@ -110,7 +107,6 @@ def analyze_api(path):
         score_sum += normalized_score
         total_blocks += 1
 
-    # ✅ Global check: HTTPS
     https_msgs, https_score = check_https_usage(data)
     report.append({
         "title": "SSL",
@@ -120,7 +116,6 @@ def analyze_api(path):
     score_sum += https_score
     total_blocks += 1
 
-    # ✅ Global check: parameter consistency
     param_report, param_score = check_param_consistency(paths)
     report.append({
         "title": "Global Parameter Consistency",
@@ -132,4 +127,12 @@ def analyze_api(path):
 
     final_score = round((score_sum / total_blocks) * 100)
     output_path = Path(__file__).parent.parent / "html" / "rest_report.html"
-    return generate_html(report, final_score, output=output_path)
+    html_path = generate_html(report, final_score, output=output_path)
+
+    return {
+        "html_path": str(html_path),
+        "json_report": {
+            "score": final_score,
+            "sections": report
+        }
+    }

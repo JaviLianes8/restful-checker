@@ -38,16 +38,20 @@ def is_valid_openapi(path):
 def parse_arguments():
     """Function to handle command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Check RESTful API compliance from OpenAPI definitions and generate HTML reports."
+        description="Check RESTful API compliance from OpenAPI definitions and generate reports."
     )
     parser.add_argument(
         "path",
         help="The OpenAPI definition file or URL (must end in .json, .yaml, or .yml).",
-        nargs="?",  # Makes the file argument optional
+        nargs="?"
     )
-
-    args = parser.parse_args()
-    return args
+    parser.add_argument(
+        "--format",
+        help="Output format: html, json, or both (default: html)",
+        choices=["html", "json", "both"],
+        default="html"
+    )
+    return parser.parse_args()
 
 def main():
     args = parse_arguments()
@@ -84,8 +88,17 @@ def main():
         sys.exit(1)
 
     try:
-        output = analyze_api(path)
-        print(f"✅ Report generated: {output}")
+        result = analyze_api(path)
+
+        if args.format in ["html", "both"]:
+            print(f"✅ HTML report generated: {result['html_path']}")
+
+        if args.format in ["json", "both"]:
+            json_path = os.path.join(os.path.dirname(result['html_path']), "rest_report.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
+            print(f"✅ JSON report generated: {json_path}")
+
     except Exception as e:
         print(f"❌ Error analyzing API: {e}")
         sys.exit(1)
