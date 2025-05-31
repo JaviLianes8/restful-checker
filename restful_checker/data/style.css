@@ -9,11 +9,10 @@ body {
     padding: 10px;
     font-family: sans-serif;
     line-height: 1.6;
-    word-wrap: break-word;
+    text-wrap-style: pretty;
     background: #fff;
 }
 
-/* Contenedor responsive centrado */
 .container {
     max-width: 900px;
     margin: auto;
@@ -37,7 +36,6 @@ body {
     border: 1px solid #ddd;
 }
 
-/* Color per severity level */
 .section-ok {
     background: #eafaf1;
 }
