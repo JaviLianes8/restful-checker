@@ -1,5 +1,3 @@
-# core/rest_docs.py
-
 REST_BEST_PRACTICES = {
     "versioning": {
         "title": "API Versioning",
@@ -36,6 +34,42 @@ REST_BEST_PRACTICES = {
         "type": "warning",
         "link": "https://spec.openapis.org/oas/v3.1.0#parameter-object",
         "summary": "Collection resources should support query filtering using ?key=value."
+    },
+    "SSL": {
+        "title": "Use HTTPS",
+        "type": "error",
+        "link": "https://restfulapi.net/security-essentials/",
+        "summary": "All APIs should be served over HTTPS to ensure secure communication."
+    },
+    "ContentType": {
+        "title": "Use JSON",
+        "type": "error",
+        "link": "https://restfulapi.net/json-rest-api/",
+        "summary": "Use application/json for request and response content where possible. Avoid XML unless necessary."
+    },
+    "resource_nesting": {
+        "title": "Resource Nesting",
+        "type": "warning",
+        "link": "https://restfulapi.net/resource-naming/",
+        "summary": "Nesting should include parent resource IDs when appropriate (e.g., /users/{id}/orders)."
+    },
+    "ResponseExamples": {
+        "title": "Response Examples",
+        "type": "warning",
+        "link": "https://spec.openapis.org/oas/v3.0.3#response-object",
+        "summary": "Use 'example' or 'examples' in response bodies to improve clarity and documentation."
+    },
+    "error_format": {
+        "title": "Consistent Error Format",
+        "type": "warning",
+        "link": "https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design#error-handling",
+        "summary": "Error responses should include fields like 'code' and 'message' in a structured format."
+    },
+    "Pagination": {
+        "title": "Pagination Support",
+        "type": "warning",
+        "link": "https://jsonapi.org/format/#fetching-pagination",
+        "summary": "GET endpoints for collections should support pagination parameters like `page` and `limit`."
     }
 }
 

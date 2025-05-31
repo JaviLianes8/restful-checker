@@ -17,16 +17,16 @@ def generate_html(report, score, output=None):
     if output is None:
         output = Path(__file__).parent.parent / "html" / "rest_report.html"
 
-    if score < 50:
+    if score < 30:
         level = "Very Low"
         color = "#c0392b"
-    elif score < 65:
+    elif score < 50:
         level = "Low"
         color = "#e74c3c"
-    elif score < 75:
+    elif score < 70:
         level = "Medium"
         color = "#f39c12"
-    elif score < 85:
+    elif score < 80:
         level = "Good"
         color = "#f1c40f"
     elif score < 95:
@@ -39,18 +39,20 @@ def generate_html(report, score, output=None):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
-        inline_css = importlib.resources.read_text("restful_checker.core.data", "style.css")
+        inline_css = importlib.resources.read_text("restful_checker.data", "style.css")
     except (FileNotFoundError, ModuleNotFoundError):
         inline_css = "/* Failed to load CSS */"
 
     html = f"""<html><head>
     <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RESTful API Report</title>
     <style>{inline_css}</style>
 </head><body>
-    <h1>RESTful API Report</h1>
-    <p><strong>Generated:</strong> {now}</p>
-    <div class='section'><div class='score' style='background:{color}'>{score}% - {level}</div></div>
+    <div class="container">
+        <h1>RESTful API Report</h1>
+        <p><strong>Generated:</strong> {now}</p>
+        <div class='section'><div class='score' style='background:{color}'>{score}% - {level}</div></div>
 """
 
     for block in report:
@@ -59,12 +61,17 @@ def generate_html(report, score, output=None):
         emoji = "🟢"
         level_class = "section-ok"
 
+        block_score = block.get("score", 1.0)
+
         if block_score < 0.5:
             level_class = "section-error"
             emoji = "🔴"
-        elif block_score < 1.0:
+        elif block_score < 0.7:
             level_class = "section-warn"
             emoji = "🟡"
+        else:
+            level_class = "section-ok"
+            emoji = "🟢"
 
         score_tag = f" <span class='score-inline'>({round(block_score * 100)}%)</span>"
 
@@ -87,7 +94,7 @@ def generate_html(report, score, output=None):
 
         html += "</div>"
 
-    html += "</body></html>"
+    html += "</div></body></html>"
     Path(output).parent.mkdir(parents=True, exist_ok=True)
     Path(output).write_text(html, encoding='utf-8')
     return str(output)

@@ -14,28 +14,39 @@ Requires Python 3.8+.
 
 🚀 Quick Usage
 restful-checker path/to/openapi.json
-This will generate an HTML report at:
 
+This will generate an HTML report at:
 html/rest_report.html
 
 You can then open it in your browser.
 
 🧪 What It Checks
 Category	Description
-✅ Versioning	Ensures /v1/, /v2/... appears early in the path
+✅ Versioning	Ensures /v1/, /v2/ appears early in the path
 ✅ Resource Naming	Detects verbs in URIs and suggests pluralization
 ✅ HTTP Methods	Validates usage of GET, POST, PUT, DELETE, etc. per REST rules
-✅ Status Codes	Checks response codes like 200, 201, 400, 404, 409
-✅ Path Parameters	Verifies correct usage and definition of path params
+✅ Status Codes	Checks use of proper HTTP codes (200, 201, 400, 404, 409)
+✅ Path Parameters	Verifies consistent and correct usage of {param} in paths
 ✅ Query Filters	Recommends filters in GET collections like ?status= or ?filter=
+✅ Pagination	Suggests support for ?page= and ?limit= in collection endpoints
+✅ HTTPS Enforcement	Ensures all servers use HTTPS
+✅ Content Types	Verifies application/json usage for requests and responses
+✅ Response Examples	Encourages defining example or examples in responses
+✅ Error Format	Suggests using structured fields like code and message
+✅ Resource Nesting	Validates nesting such as /users/{id}/orders
+✅ GZIP Support	Assumes gzip compression via Accept-Encoding
+✅ Pretty Print	Recommends support for query param like ?pretty=true
+✅ Response Wrapping	Warns about envelopes like { data: ... } unless justified
 
 📁 Structure (if cloning)
 restful-checker/
 ├── html/                   # HTML report output
 │   └── rest_report.html
-├── python/                 # Source code
-│   └── main.py
-│   └── core/               # All analyzers
+├── restful_checker/        # Source code
+│   ├── checks/             # All individual check modules
+│   ├── engine/             # OpenAPI loader and path grouping
+│   └── report/             # HTML rendering
+├── main.py                 # CLI entrypoint
 └── requirements.txt
 
 💡 Why Use It?
