@@ -6,12 +6,21 @@ import requests
 import tempfile
 import json
 import yaml
+import argparse
+
+# Import the help function from the correct module
+try:
+    from restful_checker.tools.help_restful_checker import show_help
+except ModuleNotFoundError:
+    print("❌ Error: The 'tools' module or 'help_restful_checker' file is missing in the 'restful_checker' package.")
+    print("👉 Ensure the file 'restful_checker/tools/help_restful_checker.py' exists and contains the 'show_help' function.")
+    sys.exit(1)
 
 def is_valid_file(path):
     return os.path.isfile(path) and path.endswith(('.json', '.yaml', '.yml'))
 
 def is_valid_openapi(path):
-    """ Verifica si el archivo contiene un esquema OpenAPI válido. """
+    """Check if file OpenAPI is valid."""
     try:
         with open(path, 'r', encoding='utf-8') as f:
             if path.endswith('.json'):
@@ -23,15 +32,32 @@ def is_valid_openapi(path):
                 return True
             return False
     except Exception as e:
-        print(f"❌ Error al analizar el archivo: {e}")
+        print(f"❌ Error analyzing the file: {e}")
         return False
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: restful-checker <path_to_openapi.[json|yaml|yml]> or URL")
-        sys.exit(1)
+def parse_arguments():
+    """Function to handle command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Check RESTful API compliance from OpenAPI definitions and generate HTML reports."
+    )
+    parser.add_argument(
+        "path",
+        help="The OpenAPI definition file or URL (must end in .json, .yaml, or .yml).",
+        nargs="?",  # Makes the file argument optional
+    )
 
-    path = sys.argv[1]
+    args = parser.parse_args()
+    return args
+
+def main():
+    args = parse_arguments()
+
+    # If no path argument is provided, show help
+    if args.path is None:
+        show_help()
+        sys.exit(0)
+
+    path = args.path
     parsed = urlparse(path)
 
     if parsed.scheme in ("http", "https"):
@@ -63,3 +89,6 @@ def main():
     except Exception as e:
         print(f"❌ Error analyzing API: {e}")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
