@@ -74,7 +74,6 @@ def analyze_api(path):
         items.append("### Error Format")
         items.extend(ef_msgs)
 
-
         for raw_path in info['raw']:
             # Filters
             if "get" in paths.get(raw_path, {}) and not raw_path.endswith("}"):

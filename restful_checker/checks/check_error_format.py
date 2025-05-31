@@ -1,7 +1,7 @@
 from restful_checker.checks.check_result import CheckResult
 
 def check_error_format(path: str, methods: dict) -> tuple[list[str], float]:
-    result = CheckResult("ErrorFormat")
+    result = CheckResult("error_format")
     evaluated = False
 
     for method_name, operation in methods.items():
