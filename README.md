@@ -13,10 +13,11 @@ pip install restful-checker
 Requires Python 3.8+.
 
 🚀 Quick Usage
-restful-checker path/to/openapi.json
+restful-checker path/to/openapi.json --output-format both --output-folder reports
 
-This will generate an HTML report at:
-html/rest_report.html
+This will generate both HTML and JSON reports at:
+reports/rest_report.html
+reports/rest_report.json
 
 You can then open it in your browser.
 
@@ -38,15 +39,13 @@ Category	Description
 ✅ Pretty Print	Recommends support for query param like ?pretty=true
 ✅ Response Wrapping	Warns about envelopes like { data: ... } unless justified
 
-📁 Structure (if cloning)
-restful-checker/
-├── html/                   # HTML report output
-│   └── rest_report.html
-├── restful_checker/        # Source code
-│   ├── checks/             # All individual check modules
-│   ├── engine/             # OpenAPI loader and path grouping
-│   └── report/             # HTML rendering
-├── main.py                 # CLI entrypoint
+📁 Project structure
+restful_checker/
+├── checks/             # All individual check modules
+├── engine/             # OpenAPI loader and path grouping
+├── report/             # HTML rendering
+├── tools/              # CLI help
+└── main.py             # CLI entrypoint
 └── requirements.txt
 
 💡 Why Use It?
@@ -58,8 +57,12 @@ restful-checker/
 👨‍💻 Programmatic Use (Optional)
 You can also run the analyzer in code:
 
-from restful_checker.core.analyzer import analyze_api
-html_path = analyze_api("path/to/openapi.json")
+from restful_checker.engine.analyzer import analyze_api
+result = analyze_api("path/to/openapi.json", output_dir="output")
+print(result["html_path"])
+print("HTML:", result["html_path"])
+print("JSON:", result["json_path"])
+print("Score:", result["json_report"]["score"])
 
 📌 License
 MIT – Free to use and modify
