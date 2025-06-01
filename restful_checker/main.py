@@ -46,9 +46,14 @@ def parse_arguments():
         nargs="?"
     )
     parser.add_argument(
-        "--format",
+        "--output-format",
         help="Output format: html, json, or both (default: html)",
         choices=["html", "json", "both"],
+        default="html"
+    )
+    parser.add_argument(
+        "--output-folder",
+        help="Destination folder for output reports (default: ./html)",
         default="html"
     )
     return parser.parse_args()
@@ -88,16 +93,16 @@ def main():
         sys.exit(1)
 
     try:
-        result = analyze_api(path)
+        result = analyze_api(path, output_dir=args.output_folder)
 
-        if args.format in ["html", "both"]:
-            print(f"✅ HTML report generated: {result['html_path']}")
+        if args.output_format in ["html", "both"]:
+            print(f"✅ HTML report generated: {os.path.abspath(result['html_path'])}")
 
-        if args.format in ["json", "both"]:
-            json_path = os.path.join(os.path.dirname(result['html_path']), "rest_report.json")
+        if args.output_format in ["json", "both"]:
+            json_path = os.path.join(args.output_folder, "rest_report.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
-            print(f"✅ JSON report generated: {json_path}")
+            print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
 
     except Exception as e:
         print(f"❌ Error analyzing API: {e}")

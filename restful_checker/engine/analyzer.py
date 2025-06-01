@@ -16,7 +16,7 @@ from restful_checker.checks.https_checker import check_https_usage
 from restful_checker.checks.content_type_checker import check_content_type
 from restful_checker.checks.resource_nesting_checker import check_resource_nesting
 
-def analyze_api(path):
+def analyze_api(path, output_dir="html"):
     data = load_openapi(path)
     paths = data.get("paths", {})
     resources = group_paths(paths)
@@ -126,7 +126,11 @@ def analyze_api(path):
     total_blocks += 1
 
     final_score = round((score_sum / total_blocks) * 100)
-    output_path = Path(__file__).parent.parent / "html" / "rest_report.html"
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "rest_report.html"
+
     html_path = generate_html(report, final_score, output=output_path)
 
     return {
