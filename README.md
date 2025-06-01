@@ -78,4 +78,12 @@ MIT – Free to use and modify
   <img src="https://github.com/JaviLianes8.png" width="100" alt="JaviLianes8">
 </a>
 
+## ☕ Buy Me a Coffee
+
+If you find this tool useful and want to support its development, you can buy me a coffee:
+
+<a href="https://buymeacoffee.com/jlianesglrs" target="_blank">
+  <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=jlianesglrs&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" alt="Buy Me a Coffee" />
+</a>
+
 <p align="right">(<a href="#readme-top">volver arriba</a>)</p>
