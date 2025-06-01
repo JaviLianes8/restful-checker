@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='restful-checker',
-    version='0.1.37',
+    version='0.1.38',
     description='Check RESTful API compliance from OpenAPI definitions and generate HTML reports',
     long_description=long_description,
     long_description_content_type="text/markdown",
