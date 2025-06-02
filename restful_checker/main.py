@@ -100,19 +100,8 @@ def main():
 
         if args.output_format in ["json", "both"]:
             json_path = os.path.join(args.output_folder, "rest_report.json")
-            json_clean = {
-                "score": result["json_report"]["score"],
-                "sections": [
-                    {
-                        "title": section["title"],
-                        "items": section.get("items", []),
-                        "score": section["score"]
-                    }
-                    for section in result["json_report"]["sections"]
-                ]
-            }
             with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(json_clean, f, indent=2, ensure_ascii=False)
+                json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
             print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
 
     except Exception as e:

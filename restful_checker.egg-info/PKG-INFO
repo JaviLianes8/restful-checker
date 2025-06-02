@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: restful-checker
-Version: 1.0.0
+Version: 1.0.4
 Summary: Check RESTful API compliance from OpenAPI definitions and generate HTML reports
 Author: Javier Lianes García
 Author-email: jlianesglr@gmail.com
@@ -13,6 +13,7 @@ Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 Requires-Dist: pyyaml
 Requires-Dist: requests
+Requires-Dist: beautifulsoup4
 
 # RESTful API Checker
 
