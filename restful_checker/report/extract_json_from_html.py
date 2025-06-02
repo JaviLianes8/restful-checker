@@ -51,7 +51,14 @@ def extract_json_from_html(html_path):
             elif tag.name == "ul":
                 if current_section:
                     for li in tag.find_all("li"):
-                        msg = li.text.strip().replace("✅", "").replace("❌", "").replace("⚠️", "")
+                        msg = (
+                            li.text.strip()
+                            .replace("✅", "")
+                            .replace("❌", "")
+                            .replace("⚠️", "")
+                            .replace("More info", "")
+                            .strip()
+                        )
                         current_section["messages"].append(msg)
 
         if current_section:
