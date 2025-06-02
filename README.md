@@ -15,6 +15,9 @@ Requires Python 3.8+.
 🚀 Quick Usage
 restful-checker path/to/openapi.json --output-format both --output-folder reports
 
+🔗 You can also use a **remote URL** instead of a local file:
+restful-checker https://example.com/openapi.yaml --output-format html
+
 This will generate both HTML and JSON reports at:
 reports/rest_report.html
 reports/rest_report.json
