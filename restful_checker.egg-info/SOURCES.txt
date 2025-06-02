@@ -30,6 +30,7 @@ restful_checker/engine/analyzer.py
 restful_checker/engine/openapi_loader.py
 restful_checker/engine/path_grouper.py
 restful_checker/report/__init__.py
+restful_checker/report/extract_json_from_html.py
 restful_checker/report/html_report.py
 restful_checker/report/rest_docs.py
 restful_checker/tools/__init__.py

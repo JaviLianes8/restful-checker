@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 from restful_checker.checks.check_error_format import check_error_format
 from restful_checker.checks.pagination_checker import check_pagination
@@ -16,12 +15,8 @@ from restful_checker.checks.query_filter_checker import check_query_filters
 from restful_checker.checks.https_checker import check_https_usage
 from restful_checker.checks.content_type_checker import check_content_type
 from restful_checker.checks.resource_nesting_checker import check_resource_nesting
+from restful_checker.report.extract_json_from_html import extract_json_from_html
 
-
-def strip_html(text):
-    text = re.sub(r'<[^>]+>', '', text)
-    text = re.sub(r'[✅❌⚠️]', '', text)
-    return text.strip()
 
 def analyze_api(path, output_dir="html", output_format="html"):
     data = load_openapi(path)
@@ -33,10 +28,8 @@ def analyze_api(path, output_dir="html", output_format="html"):
 
     for base, info in resources.items():
         items = [f"<strong>Routes:</strong> {', '.join(sorted(info['raw']))}"]
-        json_items = [{"type": "info", "text": f"Routes: {', '.join(sorted(info['raw']))}"}]
         all_methods = sorted(info['collection'].union(info['item']))
         items.append(f"<strong>HTTP methods:</strong> {', '.join(all_methods) or 'none'}")
-        json_items.append({"type": "info", "text": f"HTTP methods: {', '.join(all_methods) or 'none'}"})
 
         block_score = 0.0
         section_count = 0
@@ -47,8 +40,6 @@ def analyze_api(path, output_dir="html", output_format="html"):
             section_count += 1
             items.append(f"### {title}")
             items.extend(msgs)
-            clean_msgs = [strip_html(m) for m in msgs]
-            json_items.append({"type": "section", "title": title, "messages": clean_msgs})
 
         process_section("Versioning", *check_versioning(base))
         process_section("Naming", *check_naming(base))
@@ -69,29 +60,24 @@ def analyze_api(path, output_dir="html", output_format="html"):
         report.append({
             "title": f"{base}",
             "items": items,
-            "json_items": json_items,
             "score": normalized_score
         })
         score_sum += normalized_score
         total_blocks += 1
 
     https_msgs, https_score = check_https_usage(data)
-    clean_https_msgs = [strip_html(m) for m in https_msgs]
     report.append({
         "title": "SSL",
         "items": ["### Servers"] + https_msgs,
-        "json_items": [{"type": "section", "title": "Servers", "messages": clean_https_msgs}],
         "score": round(https_score, 2)
     })
     score_sum += https_score
     total_blocks += 1
 
     param_report, param_score = check_param_consistency(paths)
-    clean_param_report = [strip_html(m) for m in param_report]
     report.append({
         "title": "Global Parameter Consistency",
         "items": ["### Parameters"] + param_report,
-        "json_items": [{"type": "section", "title": "Parameters", "messages": clean_param_report}],
         "score": round(param_score, 2)
     })
     score_sum += param_score
@@ -105,14 +91,5 @@ def analyze_api(path, output_dir="html", output_format="html"):
 
     return {
         "html_path": str(html_path),
-        "json_report": {
-            "score": final_score,
-            "sections": [
-                {
-                    "title": section["title"],
-                    "score": section["score"],
-                    "items": section.get("json_items")
-                } for section in report
-            ]
-        }
+        "json_report": extract_json_from_html(html_path)
     }
