@@ -13,7 +13,7 @@ setup(
     author_email='jlianesglr@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['pyyaml','requests'],
+    install_requires=['pyyaml', 'requests', 'beautifulsoup4'],
     entry_points={
         'console_scripts': [
             'restful-checker=restful_checker.main:main'
