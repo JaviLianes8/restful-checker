@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: restful-checker
-Version: 1.0.4
+Version: 1.0.5
 Summary: Check RESTful API compliance from OpenAPI definitions and generate HTML reports
 Author: Javier Lianes García
 Author-email: jlianesglr@gmail.com

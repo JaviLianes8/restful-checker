@@ -46,10 +46,10 @@ def extract_json_from_html(html_path):
             continue
 
         full_title = h2.text.strip()
-        title_clean = re.sub(r"^[🔴🟡🟢]+\s*", "", full_title)
+        path_clean = re.sub(r"^[🔴🟡🟢]+\s*", "", full_title)
         score_match = re.search(r"\((\d+)%\)", full_title)
         section_score = int(score_match.group(1)) if score_match else 100
-        title_clean = re.sub(r"\s*\(.*?\)", "", title_clean).strip()
+        path_clean = re.sub(r"\s*\(.*?\)", "", path_clean).strip()
 
         raw_text = section.get_text()
         methods = []
@@ -65,8 +65,7 @@ def extract_json_from_html(html_path):
                 if current_section:
                     items.append(current_section)
                 current_section = {
-                    "type": "section",
-                    "title": tag.text.strip(),
+                    "category": tag.text.strip(),
                     "messages": []
                 }
             elif tag.name == "ul" and current_section:
@@ -80,20 +79,26 @@ def extract_json_from_html(html_path):
                         .strip()
                     )
                     current_section["messages"].append({
-                        "content": msg_clean,
+                        "message": msg_clean,
                         "level": classify_message_level_from_emoji(raw_msg)
                     })
 
         if current_section:
             items.append(current_section)
 
-        section_obj = {
-            "type": "section",
-            "title": title_clean,
-            "score": section_score,
-        }
+        if path_clean in ["SSL", "Global Parameter Consistency"]:
+            section_obj = {
+                "section": path_clean,
+                "score": section_score
+            }
+        else:
+            section_obj = {
+                "path": path_clean,
+                "score": section_score
+            }
+
         if methods:
-            section_obj["methods"] = methods
+            section_obj["httpMethods"] = methods
         section_obj["items"] = items
 
         result["sections"].append(section_obj)
