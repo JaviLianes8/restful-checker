@@ -103,3 +103,7 @@ ENV/
 
 # output
 /output/
+
+# idea/github
+.idea/
+.github/
