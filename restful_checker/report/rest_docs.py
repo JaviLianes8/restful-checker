@@ -1,3 +1,5 @@
+import html
+
 REST_BEST_PRACTICES = {
     "versioning": {
         "title": "API Versioning",
@@ -73,6 +75,10 @@ REST_BEST_PRACTICES = {
     }
 }
 
-def linkify(msg, key):
+
+def linkify(msg: str, key: str) -> str:
+    """Append a 'More info' link to a message based on REST category key."""
+    if key not in REST_BEST_PRACTICES:
+        return html.escape(msg)
     link = REST_BEST_PRACTICES[key]['link']
-    return f'{msg} <a href="{link}" target="_blank">More info</a>'
+    return f'{html.escape(msg)} <a href="{link}" target="_blank">More info</a>'

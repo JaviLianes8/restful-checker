@@ -1,6 +1,19 @@
 from restful_checker.checks.check_result import CheckResult
 
 def check_response_examples(path: str, methods: dict) -> tuple[list[str], float]:
+    """
+    Check that each response defines at least one example.
+
+    Accepts either `example` or `examples` in the media type block.
+    Skips content-less responses. Avoids duplicate warnings per method/status.
+
+    Args:
+        path (str): API path being evaluated.
+        methods (dict): HTTP method definitions for this path.
+
+    Returns:
+        tuple[list[str], float]: List of messages and final score.
+    """
     result = CheckResult("ResponseExamples")
     evaluated = False
     seen = set()
@@ -10,7 +23,7 @@ def check_response_examples(path: str, methods: dict) -> tuple[list[str], float]
             continue
 
         responses = operation.get("responses", {})
-        for status, response in responses.items():
+        for status_code, response in responses.items():
             content = response.get("content", {})
             if not content:
                 continue
@@ -22,11 +35,11 @@ def check_response_examples(path: str, methods: dict) -> tuple[list[str], float]
             )
 
             if not has_example:
-                key = (method_name.upper(), path, status)
+                key = (method_name.upper(), path, status_code)
                 if key not in seen:
                     seen.add(key)
                     result.warning(
-                        f"{method_name.upper()} {path} response {status} is missing example or examples"
+                        f"{method_name.upper()} {path} response {status_code} is missing example or examples"
                     )
 
     if not evaluated:

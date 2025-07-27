@@ -13,46 +13,56 @@ def check_unusual_method(method, result):
         result.warning(f"Unusual HTTP method used: {method}")
 
 def check_get_with_action(path, method, result):
-    if method == "GET":
+    if method.upper() == "GET":
         for action in ACTIONS_FOR_GET:
             if action in path.lower():
                 result.error(f"GET used for action-like path: `{path}` — consider using POST instead")
                 break
 
 def check_post_with_delete(path, method, result):
-    if method == "POST":
+    if method.upper() == "POST":
         for action in ACTIONS_FOR_POST_DELETE:
             if action in path.lower():
                 result.error(f"POST used for deletion-like path: `{path}` — consider using DELETE")
                 break
 
 def check_put_with_create(path, method, result):
-    if method == "PUT":
+    if method.upper() == "PUT":
         for action in ACTIONS_FOR_PUT_CREATE:
             if action in path.lower():
                 result.warning(f"PUT used for creation-like path: `{path}` — consider using POST")
                 break
 
 def check_get_with_side_effect(path, method, result):
-    if method == "GET":
+    if method.upper() == "GET":
         for verb in ["reset", "execute", "trigger", "start"]:
             if verb in path.lower():
                 result.error(f"GET used for side-effect path: `{path}` — should be POST or PUT")
                 break
 
 def check_post_on_resource_id(path, method, result):
-    if method == "POST":
+    if method.upper() == "POST":
         if re.search(r"/\{[^}]+}", path):
             result.warning(f"POST used with resource ID in path `{path}` — consider using PUT or PATCH")
 
 def check_delete_without_id(path, method, result):
-    if method == "DELETE":
+    if method.upper() == "DELETE":
         if not re.search(r"/\{[^}]+}", path):
             result.warning(f"DELETE without ID in path `{path}` — consider confirming if this is intentional")
 
 # === Main Function ===
 
-def check_http_methods(path: str, methods: set):
+def check_http_methods(path: str, methods: set) -> tuple[list[str], float]:
+    """
+    Analyze a set of HTTP methods for RESTful convention violations.
+
+    Args:
+        path (str): API path to analyze.
+        methods (set[str]): HTTP methods used in that path.
+
+    Returns:
+        tuple[list[str], float]: List of messages and final score.
+    """
     result = CheckResult("http_methods")
 
     for method in methods:
