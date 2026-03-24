@@ -3,11 +3,14 @@ import json
 import os
 import sys
 import tempfile
+import webbrowser
 import requests
 import yaml
 
 from urllib.parse import urlparse
 from restful_checker.engine.analyzer import analyze_api
+
+__version__ = "3.1.0"
 
 try:
     from restful_checker.tools.help_restful_checker import show_help
@@ -90,18 +93,23 @@ def resolve_openapi_path(path):
 def parse_arguments():
     """
     Parse command-line arguments using argparse.
-    
+
     Returns:
         argparse.Namespace: Parsed arguments object.
     """
     parser = argparse.ArgumentParser(
         description="Check RESTful API compliance from OpenAPI definitions and generate reports."
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("path", nargs="?", help="Path or URL to OpenAPI file (.json, .yaml, .yml)")
     parser.add_argument("--output-format", choices=["html", "json", "both"], default="html",
                         help="Output format: html, json, or both (default: html)")
     parser.add_argument("--output-folder", default="html",
                         help="Destination folder for output reports (default: ./html)")
+    parser.add_argument("--open", action="store_true",
+                        help="Open the generated HTML report in the default browser")
+    parser.add_argument("-q", "--quiet", action="store_true",
+                        help="Suppress all output except errors")
     return parser.parse_args()
 
 
@@ -127,15 +135,20 @@ def run_checker(args):
 
     try:
         result = analyze_api(path, output_dir=args.output_folder)
+        html_path = os.path.abspath(result['html_path'])
 
         if args.output_format in ["html", "both"]:
-            print(f"✅ HTML report generated: {os.path.abspath(result['html_path'])}")
+            if not args.quiet:
+                print(f"✅ HTML report generated: {html_path}")
+            if args.open:
+                webbrowser.open(f"file://{html_path}")
 
         if args.output_format in ["json", "both"]:
             json_path = os.path.join(args.output_folder, "rest_report.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
-            print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
+            if not args.quiet:
+                print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
 
         return 0
     except Exception as e:
