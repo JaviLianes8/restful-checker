@@ -44,7 +44,9 @@ def test_malformed_responses_do_not_crash(tmp_path: Path, operation: dict[str, A
         check("/v1/users", {"get": operation})
 
 
-@pytest.mark.parametrize("segment", ["getusers", "createorder", "deleteall", "fetchdata"])
+@pytest.mark.parametrize(
+    "segment", ["getusers", "createorder", "deleteall", "fetchdata", "add_item", "do2"]
+)
 def test_lower_case_verb_compounds_are_still_verbs(segment: str) -> None:
     assert any("verb-like" in m for m in check_naming(f"/v1/{segment}")[0])
 
@@ -70,6 +72,11 @@ def test_action_compounds_are_still_flagged(path: str, method: str) -> None:
 
 def test_participles_are_not_actions() -> None:
     assert check_http_methods("/v1/users/deleted", {"GET"})[1] == 1.0
+    assert check_http_methods("/v1/users/createdBy", {"GET"})[1] == 1.0
+
+
+def test_acronyms_are_split_before_compounds() -> None:
+    assert check_http_methods("/v1/HTTPResetpassword", {"GET"})[1] == 0.0
 
 
 def test_trailing_slash_item_paths_get_no_filters(tmp_path: Path) -> None:
