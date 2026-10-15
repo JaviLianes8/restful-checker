@@ -65,14 +65,12 @@ restful-checker openapi.json --output-format both --output-folder reports
 |-------|-------------|
 | Response Examples | Encourages `example` in responses |
 | Error Format | Suggests structured `code` and `message` fields |
-| Response Wrapping | Warns about unnecessary envelopes |
 
 ### Performance
 | Check | Description |
 |-------|-------------|
 | Pagination | Suggests `?page=` and `?limit=` for collections |
 | Query Filters | Recommends filters like `?status=` |
-| GZIP Support | Checks `Accept-Encoding` |
 
 ## Programmatic Usage
 

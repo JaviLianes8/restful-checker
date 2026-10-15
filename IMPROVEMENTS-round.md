@@ -3,14 +3,14 @@
 Progress:
 - [x] Brainstorm ranked improvements (this file)
 - [x] Pin the ground truth: OpenAPI 2.0, 3.0.4, 3.1.2, 3.2.1, RFC 9110, RFC 6839, RFC 9457, RFC 8259
-- [ ] Spec reading: operations only, path-level parameters, local references, string status codes
-- [ ] Analyzer: item paths checked against their own operations
-- [ ] Checker false positives (verb prefixes, version segment, item pagination, JSON media types, word matching)
-- [ ] Report: escaped HTML, correct `httpMethods`, `json_path` returned
-- [ ] Command line: remote YAML, encodings, temporary file, Windows console
-- [ ] Python 3.8 and 3.9 import and run
-- [ ] Tests and coverage, contracts, pinned sources
-- [ ] Typing: mypy --strict, py.typed
+- [x] Spec reading: operations only, path-level parameters, local references, string status codes
+- [x] Analyzer: item paths checked against their own operations
+- [x] Checker false positives (verb prefixes, version segment, item pagination, JSON media types, word matching)
+- [x] Report: escaped HTML, correct `httpMethods`, `json_path` returned
+- [x] Command line: remote YAML, encodings, temporary file, Windows console
+- [x] Python 3.8 and 3.9 import and run
+- [x] Tests and coverage, contracts, pinned sources
+- [x] Typing: mypy --strict, py.typed
 - [ ] Gates: ruff format, ruff check, mypy --strict, pytest
 - [ ] Mutation run
 - [ ] Independent review findings fixed
