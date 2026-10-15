@@ -10,7 +10,8 @@ import tempfile
 from urllib.parse import urlparse
 
 import requests
-import yaml
+
+from restful_checker.engine.openapi_loader import load_openapi
 
 
 def _print(text: str) -> None:
@@ -54,10 +55,8 @@ def is_valid_openapi(path: str) -> bool:
         bool: True if the file contains a valid OpenAPI or Swagger root key.
     """
     try:
-        # utf-8-sig: RFC 8259 lets a parser ignore a byte order mark, and editors write one.
-        with open(path, encoding="utf-8-sig") as f:
-            data = json.load(f) if path.lower().endswith(".json") else yaml.safe_load(f)
-            return isinstance(data, dict) and ("openapi" in data or "swagger" in data)
+        data = load_openapi(path)
+        return isinstance(data, dict) and ("openapi" in data or "swagger" in data)
     except Exception as e:
         print_error(f"Error parsing OpenAPI file: {e}")
         return False

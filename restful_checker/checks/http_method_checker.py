@@ -1,3 +1,5 @@
+"""HTTP method semantics of the operations of one route."""
+
 from __future__ import annotations
 
 import re
@@ -5,7 +7,9 @@ import re
 from restful_checker.checks.check_result import CheckResult
 from restful_checker.checks.verb_words import contains_verb, words
 
-VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH"}
+# The methods RFC 9110 registers that OpenAPI has a field for, PATCH (RFC 5789) and the
+# QUERY operation of OpenAPI 3.2. CONNECT has no Path Item field.
+VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE", "QUERY"}
 ACTIONS_FOR_GET = {"create", "update", "delete", "remove"}
 ACTIONS_FOR_POST_DELETE = {"delete", "remove"}
 ACTIONS_FOR_PUT_CREATE = {"create"}
@@ -81,6 +85,11 @@ def check_delete_without_id(path: str, method: str, result: CheckResult) -> None
 def check_http_methods(path: str, methods: set[str]) -> tuple[list[str], float]:
     """
     Analyze a set of HTTP methods for RESTful convention violations.
+
+    >>> check_http_methods("/v1/users", {"GET", "HEAD", "OPTIONS"})
+    (['✅ HTTP method usage looks valid'], 1.0)
+    >>> check_http_methods("/v1/resetPassword", {"GET"})[0]
+    ['❌ GET used for side-effect path: `/v1/resetPassword`, should be POST or PUT']
 
     Args:
         path (str): API path to analyze.

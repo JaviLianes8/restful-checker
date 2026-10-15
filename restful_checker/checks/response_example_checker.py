@@ -1,16 +1,25 @@
+"""Examples of the response bodies of one route."""
+
 from __future__ import annotations
 
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.schema_tools import has_example as schema_has_example
 
 
 def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that each response defines at least one example.
 
-    Accepts either `example` or `examples` in the media type block.
-    Skips content-less responses. Avoids duplicate warnings per method/status.
+    Accepts `example` or `examples` in the media type block or in its schema (also
+    through ``allOf``). Skips content-less responses. Avoids duplicate warnings per
+    method/status.
+
+    >>> media = {"schema": {"type": "object", "example": {"id": 1}}}
+    >>> ok = {"responses": {"200": {"content": {"application/json": media}}}}
+    >>> check_response_examples("/v1/users", {"get": ok})
+    (['✅ All responses define at least one example'], 1.0)
 
     Args:
         path (str): API path being evaluated.
@@ -37,7 +46,12 @@ def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[st
 
             evaluated = True
             has_example = any(
-                isinstance(media, dict) and ("example" in media or "examples" in media)
+                isinstance(media, dict)
+                and (
+                    "example" in media
+                    or "examples" in media
+                    or schema_has_example(media.get("schema"))
+                )
                 for media in content.values()
             )
 

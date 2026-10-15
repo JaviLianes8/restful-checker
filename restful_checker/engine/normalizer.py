@@ -1,8 +1,9 @@
 """Read the Paths Object the way the OpenAPI specification defines it.
 
 The checks receive plain dictionaries: only real operations, every local ``$ref`` they need
-followed, path-level parameters merged in and status codes as strings. The document passed
-in is never modified.
+followed (media schemas and their ``allOf`` members included), path-level parameters merged
+in and status codes as strings. References to other files or URLs are left as they are. The
+document passed in is never modified.
 """
 
 from __future__ import annotations
@@ -14,6 +15,9 @@ from urllib.parse import unquote
 OPERATION_KEYS = ("get", "put", "post", "delete", "options", "head", "patch", "trace", "query")
 
 _MAX_HOPS = 32
+# `allOf` members expanded per schema: enough for real documents, bounded for hostile ones
+# (a member list repeating one reference at every level would otherwise grow exponentially).
+_MAX_EXPANSIONS = 256
 
 
 def _pointer(root: Any, ref: str) -> Any:
@@ -60,6 +64,29 @@ def _merge_parameters(shared: list[Any], own: list[Any]) -> list[Any]:
     return [param for param in shared if key(param) not in own_keys] + own
 
 
+def _expand(node: Any, root: Any, budget: list[int], refs: tuple[str, ...]) -> Any:
+    members = node.get("allOf") if isinstance(node, dict) else None
+    if not isinstance(members, list) or budget[0] <= 0:
+        return node
+    budget[0] -= 1
+    expanded = []
+    for member in members:
+        ref = member.get("$ref") if isinstance(member, dict) else None
+        if isinstance(ref, str) and ref in refs:
+            expanded.append(member)  # a schema built from itself: leave the cycle closed
+            continue
+        chain = (*refs, ref) if isinstance(ref, str) else refs
+        expanded.append(_expand(resolve(member, root), root, budget, chain))
+    return {**node, "allOf": expanded}
+
+
+def _schema(schema: Any, root: Any) -> Any:
+    """Resolve a schema and the local references of its ``allOf`` members."""
+    ref = schema.get("$ref") if isinstance(schema, dict) else None
+    refs = (ref,) if isinstance(ref, str) else ()
+    return _expand(resolve(schema, root), root, [_MAX_EXPANSIONS], refs)
+
+
 def _media(content: Any, root: Any) -> dict[Any, Any]:
     if not isinstance(content, dict):
         return {}  # malformed content reads as no content
@@ -67,7 +94,7 @@ def _media(content: Any, root: Any) -> dict[Any, Any]:
     for media_type, media in content.items():
         media = resolve(media, root)
         if isinstance(media, dict) and "schema" in media:
-            media = {**media, "schema": resolve(media["schema"], root)}
+            media = {**media, "schema": _schema(media["schema"], root)}
         result[media_type] = media
     return result
 

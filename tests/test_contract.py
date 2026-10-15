@@ -25,20 +25,32 @@ from restful_checker.checks import (
 from restful_checker.engine import analyzer
 
 ROOT = Path(__file__).resolve().parents[1]
+PYPROJECT = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_package_exports_and_version() -> None:
     assert restful_checker.__all__ == ["analyze_api"]
     assert restful_checker.analyze_api is analyzer.analyze_api
-    assert re.fullmatch(r"\d+\.\d+\.\d+", restful_checker.__version__)
+    assert restful_checker.__version__ == "3.2.0"
     assert cli.__version__ == restful_checker.__version__
-    setup = (ROOT / "setup.py").read_text(encoding="utf-8")
-    assert f"version='{restful_checker.__version__}'" in setup
+    assert re.search(rf'^version = "{re.escape(restful_checker.__version__)}"$', PYPROJECT, re.M)
+    assert not (ROOT / "setup.py").exists()
 
 
 def test_typed_marker_ships() -> None:
     assert (Path(restful_checker.__file__).parent / "py.typed").is_file()
-    assert "restful_checker/py.typed" in (ROOT / "MANIFEST.in").read_text(encoding="utf-8")
+    assert 'packages = ["restful_checker"]' in PYPROJECT
+
+
+def test_metadata() -> None:
+    assert 'requires-python = ">=3.8"' in PYPROJECT
+    assert '"Development Status :: 5 - Production/Stable"' in PYPROJECT
+    assert 'dependencies = ["pyyaml", "requests"]' in PYPROJECT
+    minors = set(re.findall(r'"Programming Language :: Python :: 3\.(\d+)"', PYPROJECT))
+    assert minors == {str(minor) for minor in range(8, 15)}
+    for name in ("Homepage", "Source", "Issues", "Changelog"):
+        assert re.search(rf"^{name} = \"https://github.com/JaviLianes8/", PYPROJECT, re.M)
+    assert 'license = "MIT"' in PYPROJECT and "keywords = [" in PYPROJECT
 
 
 def test_analyze_api_signature() -> None:
@@ -99,5 +111,4 @@ def test_cli_options_are_unchanged() -> None:
 
 
 def test_console_script_entry_point() -> None:
-    setup = (ROOT / "setup.py").read_text(encoding="utf-8")
-    assert "'restful-checker=restful_checker.main:main'" in setup
+    assert 'restful-checker = "restful_checker.main:main"' in PYPROJECT

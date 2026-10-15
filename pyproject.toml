@@ -1,12 +1,65 @@
-# Package metadata lives in setup.py; this file holds the build backend and tool settings.
 [build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "restful-checker"
+version = "3.2.0"
+description = "Check RESTful API compliance from OpenAPI definitions and generate HTML reports"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Javier Lianes García", email = "jlianesglr@gmail.com" }]
+keywords = ["openapi", "swagger", "rest", "api", "lint", "linter", "api-design", "report"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+# PyYAML reads YAML documents; requests fetches remote ones.
+dependencies = ["pyyaml", "requests"]
+
+[project.scripts]
+restful-checker = "restful_checker.main:main"
+
+[project.urls]
+Homepage = "https://github.com/JaviLianes8/restful-checker"
+Source = "https://github.com/JaviLianes8/restful-checker"
+Issues = "https://github.com/JaviLianes8/restful-checker/issues"
+Changelog = "https://github.com/JaviLianes8/restful-checker/blob/main/CHANGELOG.md"
+LinkedIn = "https://www.linkedin.com/in/jlianes/"
+
+[tool.hatch.build.targets.wheel]
+packages = ["restful_checker"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "restful_checker",
+    "tests/*.py",
+    "tests/upstream/MANIFEST.json",
+    "scripts",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "requirements-dev.txt",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py38"
-extend-exclude = ["setup.py"]  # the owner's packaging script, kept as written
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]

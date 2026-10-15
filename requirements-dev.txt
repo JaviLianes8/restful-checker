@@ -1,7 +1,9 @@
 build
+hatchling
 pytest
 pytest-cov
 ruff
 mypy
+twine
 types-PyYAML
 types-requests

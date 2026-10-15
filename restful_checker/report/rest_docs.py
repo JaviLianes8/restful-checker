@@ -1,3 +1,5 @@
+"""Best-practice links shown next to the problems of each check category."""
+
 from __future__ import annotations
 
 import html
@@ -82,6 +84,23 @@ REST_BEST_PRACTICES = {
         "summary": "GET endpoints for collections should support pagination parameters like "
         "`page` and `limit`.",
     },
+}
+
+
+# Section headings of the report and the category whose link their problems carry.
+SECTION_KEYS = {
+    "Versioning": "versioning",
+    "Naming": "naming",
+    "HTTP Methods": "http_methods",
+    "Status Codes": "status_codes",
+    "Content Types": "ContentType",
+    "Response Examples": "ResponseExamples",
+    "Error Format": "error_format",
+    "Filters": "query_filters",
+    "Pagination": "Pagination",
+    "Resource Nesting": "resource_nesting",
+    "Servers": "SSL",
+    "Parameters": "param_consistency",
 }
 
 

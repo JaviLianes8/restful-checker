@@ -1,7 +1,8 @@
+"""Run every check over an OpenAPI document and write the reports."""
+
 from __future__ import annotations
 
 import re
-from html import escape
 from pathlib import Path
 from typing import Any, Callable, List, Tuple
 
@@ -20,8 +21,7 @@ from restful_checker.checks.version_checker import check_versioning
 from restful_checker.engine.normalizer import normalize_paths
 from restful_checker.engine.openapi_loader import load_openapi
 from restful_checker.engine.path_grouper import group_paths
-from restful_checker.report.extract_json_from_html import extract_json_from_html
-from restful_checker.report.html_report import generate_html
+from restful_checker.report.html_report import write_reports
 
 CheckOutput = Tuple[List[str], float]  # a runtime alias: subscripted builtins need 3.9
 
@@ -46,8 +46,8 @@ def _analyze_group(
 ) -> dict[str, Any]:
     methods = sorted(info["collection"].union(info["item"]))
     items = [
-        f"<strong>Routes:</strong> {escape(', '.join(sorted(info['raw'])))}",
-        f"<strong>HTTP methods:</strong> {escape(', '.join(methods or ['none']))}",
+        f"Routes: {', '.join(sorted(info['raw']))}",
+        f"HTTP methods: {', '.join(methods or ['none'])}",
     ]
     scores: list[float] = []
 
@@ -93,7 +93,24 @@ def analyze_api(
         dict: Contains:
             - 'html_path': Path to the generated HTML report.
             - 'json_path': Path to the JSON report written next to it.
-            - 'json_report': Parsed JSON report extracted from the HTML.
+            - 'json_report': The JSON report, built from the same data as the HTML.
+
+    Raises:
+        OSError: The file cannot be read or the report cannot be written.
+        ValueError: The file is not JSON or YAML holding a mapping, its extension is not
+            .json, .yaml or .yml, or it is nested too deeply to read.
+
+    >>> import json, pathlib, tempfile
+    >>> folder = pathlib.Path(tempfile.mkdtemp())
+    >>> spec = folder / "openapi.json"
+    >>> doc = {"openapi": "3.0.3", "info": {"title": "t", "version": "1"},
+    ...        "paths": {"/v1/users": {"get": {"responses": {"200": {"description": "ok"}}}}}}
+    >>> _ = spec.write_text(json.dumps(doc), encoding="utf-8")
+    >>> result = analyze_api(spec, output_dir=folder / "out")
+    >>> result["json_report"]["sections"][0]["httpMethods"]
+    ['GET']
+    >>> pathlib.Path(result["html_path"]).name
+    'rest_report.html'
     """
     # Load and parse the OpenAPI spec
     data = load_openapi(path)
@@ -135,12 +152,10 @@ def analyze_api(
     final_score = round((score_sum / total_blocks) * 100)
 
     # Output
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    html_path = generate_html(report, final_score, output=output_dir / "rest_report.html")
-
+    output = Path(output_dir) / "rest_report.html"
+    html_path, json_report = write_reports(report, final_score, output)
     return {
-        "html_path": str(html_path),
+        "html_path": html_path,
         "json_path": str(Path(html_path).with_suffix(".json")),
-        "json_report": extract_json_from_html(html_path),
+        "json_report": json_report,
     }

@@ -1,3 +1,5 @@
+"""Write the HTML report, and the JSON report built from the same data."""
+
 from __future__ import annotations
 
 import html as html_lib
@@ -8,14 +10,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from restful_checker.report.extract_json_from_html import extract_json_from_html
+from restful_checker.report.json_report import build_json_report, ordered
+from restful_checker.report.rest_docs import REST_BEST_PRACTICES, SECTION_KEYS
+
+# Labels of the lines that open a route section; the label is shown in bold.
+LABELS = ("Routes:", "HTTP methods:")
 
 
 def render_ordered_section(messages: list[str]) -> str:
-    errors = [m for m in messages if m.startswith("❌")]
-    warnings = [m for m in messages if m.startswith("⚠️")]
-    others = [m for m in messages if not m.startswith(("❌", "⚠️"))]
-    return "<ul>" + "".join(f"<li>{m}</li>" for m in errors + warnings + others) + "</ul>"
+    """List already rendered messages, errors first, then warnings, then the rest."""
+    return "<ul>" + "".join(f"<li>{m}</li>" for m in ordered(messages)) + "</ul>"
 
 
 def get_score_level(score: int) -> tuple[str, str]:
@@ -43,23 +47,64 @@ def _read_css() -> str:
     return data.decode("utf-8")
 
 
-def generate_html(
-    report: list[dict[str, Any]],
-    score: int,
-    output: str | Path | None = None,
-    write_json: bool = True,
-) -> str:
-    output = Path(output or Path(__file__).parent.parent / "html" / "rest_report.html")
+def render_message(message: str, section: str | None) -> str:
+    """Escape a plain-text message; errors and warnings link to their best practice.
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    >>> render_message("⚠️ Segment `<b>` is too generic", "Naming")[:40]
+    '⚠️ Segment `&lt;b&gt;` is too generic <a'
+    """
+    text = html_lib.escape(message)
+    if section is None:
+        for label in LABELS:
+            if message.startswith(label):
+                return f"<strong>{label}</strong>{html_lib.escape(message[len(label) :])}"
+        return text
+    key = SECTION_KEYS.get(section)
+    if key is None or not message.startswith(("❌", "⚠️")):
+        return text
+    link = REST_BEST_PRACTICES[key]["link"]
+    return f'{text} <a href="{link}" target="_blank">More info</a>'
+
+
+def _block_html(block: dict[str, Any]) -> list[str]:
+    block_score = block.get("score", 1.0)
+    emoji, level_class = (
+        ("🔴", "section-error")
+        if block_score < 0.5
+        else ("🟡", "section-warn")
+        if block_score < 0.7
+        else ("🟢", "section-ok")
+    )
+    title = html_lib.escape(str(block["title"]))
+    parts = [
+        f"<div class='section {level_class}'><h2>{emoji}&nbsp;{title} "
+        f"<span class='score-inline'>({round(block_score * 100)}%)</span></h2>"
+    ]
+    section: str | None = None
+    messages: list[str] = []
+    for item in block["items"]:
+        if item.startswith("### "):
+            if messages:
+                parts.append(render_ordered_section(messages))
+                messages = []
+            section = item[4:]
+            parts.append(f"<h3>{html_lib.escape(section)}</h3>")
+        else:
+            messages.append(render_message(item, section))
+    if messages:
+        parts.append(render_ordered_section(messages))
+    parts.append("</div>")
+    return parts
+
+
+def render_html(report: list[dict[str, Any]], score: int, generated: str) -> str:
+    """Return the HTML page of a report."""
     level, color = get_score_level(score)
-
     try:
         inline_css = _read_css()
     except Exception:
         inline_css = "/* Failed to load CSS */"
-
-    html_parts = [
+    parts = [
         "<html><head>",
         "<meta charset='utf-8'>",
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
@@ -68,54 +113,35 @@ def generate_html(
         "</head><body>",
         '<div class="container">',
         "<h1>RESTful API Report</h1>",
-        f"<p><strong>Generated:</strong> {now}</p>",
+        f"<p><strong>Generated:</strong> {generated}</p>",
         f"<div class='section'><div class='score' style='background:{color}'>{score}% - "
         f"{level}</div></div>",
     ]
-
     for block in report:
-        block_score = block.get("score", 1.0)
-        emoji, level_class = (
-            ("🔴", "section-error")
-            if block_score < 0.5
-            else ("🟡", "section-warn")
-            if block_score < 0.7
-            else ("🟢", "section-ok")
-        )
+        parts.extend(_block_html(block))
+    parts.append("</div></body></html>")
+    return "\n".join(parts)
 
-        title = html_lib.escape(str(block["title"]))
-        html_parts.append(
-            f"<div class='section {level_class}'><h2>{emoji}&nbsp;{title} "
-            f"<span class='score-inline'>({round(block_score * 100)}%)</span></h2>"
-        )
 
-        section_messages: list[str] = []
-        for item in block["items"]:
-            if item.startswith("### "):
-                if section_messages:
-                    html_parts.append(render_ordered_section(section_messages))
-                    section_messages = []
-                current_section = item[4:]
-                html_parts.append(f"<h3>{current_section}</h3>")
-            else:
-                section_messages.append(item)
-
-        if section_messages:
-            html_parts.append(render_ordered_section(section_messages))
-
-        html_parts.append("</div>")
-
-    html_parts.append("</div></body></html>")
-    html = "\n".join(html_parts)
-
+def write_reports(
+    report: list[dict[str, Any]], score: int, output: Path, write_json: bool = True
+) -> tuple[str, dict[str, Any]]:
+    """Write the HTML page (and its JSON twin); return the page path and the JSON report."""
+    generated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = build_json_report(report, score, generated)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(html, encoding="utf-8")
-
-    # Optional: generate matching .json file
+    output.write_text(render_html(report, score, generated), encoding="utf-8")
     if write_json:
-        json_output = output.with_suffix(".json")
-        json_output.write_text(
-            json.dumps(extract_json_from_html(output), indent=2), encoding="utf-8"
-        )
+        output.with_suffix(".json").write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return str(output), data
 
-    return str(output)
+
+def generate_html(
+    report: list[dict[str, Any]],
+    score: int,
+    output: str | Path | None = None,
+    write_json: bool = True,
+) -> str:
+    """Write the HTML report (and ``rest_report.json`` next to it) and return its path."""
+    path = Path(output or Path(__file__).parent.parent / "html" / "rest_report.html")
+    return write_reports(report, score, path, write_json)[0]
