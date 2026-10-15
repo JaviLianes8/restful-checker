@@ -15,7 +15,7 @@ Progress:
 - [x] Gates: ruff format, ruff check, mypy --strict, pytest
 - [x] Mutation run
 - [x] Independent review findings fixed
-- [ ] Pull request opened, guard clean
+- [x] Pull request opened (#1), guard clean
 
 Every change keeps the public surface: `analyze_api(path, output_dir, output_format)`, its
 return keys, every checker function and its `(messages, score)` tuple, the CLI options and the
