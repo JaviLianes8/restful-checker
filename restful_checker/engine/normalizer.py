@@ -1,7 +1,8 @@
 """Read the Paths Object the way the OpenAPI specification defines it.
 
 The checks receive plain dictionaries: only real operations, every local ``$ref`` they need
-followed (media schemas and their ``allOf`` members included), path-level parameters merged
+followed (parameter and media schemas and their ``allOf``, ``oneOf`` and ``anyOf`` members
+included), path-level parameters merged
 in and status codes as strings. References to other files or URLs are left as they are. The
 document passed in is never modified.
 """
@@ -18,6 +19,7 @@ _MAX_HOPS = 32
 # `allOf` members expanded per schema: enough for real documents, bounded for hostile ones
 # (a member list repeating one reference at every level would otherwise grow exponentially).
 _MAX_EXPANSIONS = 256
+COMPOSITION_KEYS = ("allOf", "oneOf", "anyOf")
 
 
 def _pointer(root: Any, ref: str) -> Any:
@@ -52,7 +54,9 @@ def resolve(node: Any, root: Any) -> Any:
 def _parameter(param: Any, root: Any) -> Any:
     param = resolve(param, root)
     if isinstance(param, dict) and "schema" in param:
-        return {**param, "schema": _schema(param["schema"], root)}
+        param = {**param, "schema": _schema(param["schema"], root)}
+    if isinstance(param, dict) and "content" in param:
+        param = {**param, "content": _media(param["content"], root)}
     return param
 
 
@@ -72,23 +76,29 @@ def _merge_parameters(shared: list[Any], own: list[Any]) -> list[Any]:
 
 
 def _expand(node: Any, root: Any, budget: list[int], refs: tuple[str, ...]) -> Any:
-    members = node.get("allOf") if isinstance(node, dict) else None
-    if not isinstance(members, list) or budget[0] <= 0:
+    if not isinstance(node, dict):
         return node
-    budget[0] -= 1
-    expanded = []
-    for member in members:
-        ref = member.get("$ref") if isinstance(member, dict) else None
-        if isinstance(ref, str) and ref in refs:
-            expanded.append(member)  # a schema built from itself: leave the cycle closed
+    result = node
+    for key in COMPOSITION_KEYS:
+        members = node.get(key)
+        if not isinstance(members, list) or budget[0] <= 0:
             continue
-        chain = (*refs, ref) if isinstance(ref, str) else refs
-        expanded.append(_expand(resolve(member, root), root, budget, chain))
-    return {**node, "allOf": expanded}
+        budget[0] -= 1
+        expanded = []
+        for member in members:
+            ref = member.get("$ref") if isinstance(member, dict) else None
+            if isinstance(ref, str) and ref in refs:
+                expanded.append(member)  # a schema built from itself: leave the cycle closed
+                continue
+            chain = (*refs, ref) if isinstance(ref, str) else refs
+            expanded.append(_expand(resolve(member, root), root, budget, chain))
+        result = {**result, key: expanded}
+    return result
 
 
 def _schema(schema: Any, root: Any) -> Any:
-    """Resolve a schema and the local references of its ``allOf`` members."""
+    """Resolve a schema and the local references of its ``allOf``, ``oneOf`` and ``anyOf``
+    members."""
     ref = schema.get("$ref") if isinstance(schema, dict) else None
     refs = (ref,) if isinstance(ref, str) else ()
     return _expand(resolve(schema, root), root, [_MAX_EXPANSIONS], refs)

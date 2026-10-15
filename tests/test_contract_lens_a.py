@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 from pathlib import Path
+from typing import Any
 
 import pytest
 from conftest import all_messages, document, write_json
@@ -87,3 +88,39 @@ def test_the_package_lists_only_its_api() -> None:
 def test_helpers_document_examples() -> None:
     for helper in (is_json_media_type, covers):
         assert ">>> " in (helper.__doc__ or "")
+
+
+TYPED = [
+    {"schema": {"oneOf": [{"type": "string"}, {"type": "array"}]}},
+    {"schema": {"anyOf": [{"enum": ["a"]}, {"const": 1}]}},
+    {"schema": {"allOf": [{"$ref": "#/components/schemas/T"}]}},
+    {"schema": {"$ref": "#/components/schemas/S"}},
+    {"schema": {"enum": ["open", "closed"]}},
+    {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/T"}}}},
+    {"enum": ["a"]},
+]
+UNTYPED = [
+    {"schema": {"oneOf": [{"type": "string"}, {"description": "x"}]}},
+    {"schema": {"description": "anything"}},
+    {"content": {"application/json": {}}},
+    {"content": "x"},
+    {},
+]
+
+
+def filter_messages(tmp_path: Path, param: dict[str, Any]) -> list[str]:
+    schemas = {"T": {"type": "string"}, "S": {"allOf": [{"$ref": "#/components/schemas/T"}]}}
+    get = {"parameters": [{"name": "status", "in": "query", **param}], "responses": {}}
+    doc = document({"/v1/users": {"get": get}}, components={"schemas": schemas})
+    report = analyze_api(write_json(tmp_path, doc), output_dir=tmp_path)["json_report"]
+    return [m["message"] for m in all_messages(report, "Filters")]
+
+
+@pytest.mark.parametrize("param", TYPED)
+def test_typed_query_parameters(tmp_path: Path, param: dict[str, Any]) -> None:
+    assert filter_messages(tmp_path, param) == ["Collection endpoints support query filters"]
+
+
+@pytest.mark.parametrize("param", UNTYPED)
+def test_untyped_query_parameters(tmp_path: Path, param: dict[str, Any]) -> None:
+    assert filter_messages(tmp_path, param) == ["Query parameter `status` has no defined type"]

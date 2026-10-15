@@ -8,7 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 Stable surface: the `restful-checker` command and its options, `analyze_api(path,
 output_dir="html", output_format="html")` with its three return keys, the twelve check
-functions with their `(messages, score)` result, and the HTML and JSON report layouts.
+functions with their `(messages, score)` result, the six helpers named in the README
+(`covers`, `is_json_media_type`, `is_binary_media_type`, `is_structured_error`,
+`is_pagination_parameter`, `server_kind`), and the HTML and JSON report layouts.
 Everything below that changes a verdict, a message or a score compared with 3.1.1 is
 listed.
 
@@ -43,6 +45,10 @@ listed.
   scheme part warns "A server URL uses a variable without a default or enum". The scheme
   is compared ignoring case and `wss://` counts as secure.
 - Response examples count an `example` or `examples` on the schema (also through `allOf`).
+- Query filters no longer call a parameter untyped when its schema says what it holds
+  through `enum`, `const`, `oneOf`/`anyOf` members that all have a type, or an `allOf`
+  member, or when an OpenAPI 3 parameter gives its schema under `content`. Local `$ref`s in
+  `oneOf` and `anyOf` are followed like those in `allOf`.
 - Version segments include `v1.2`, `v1.0.3`, `v1beta`, `v1beta1` and `v2alpha5`, both for
   Versioning and for the mixed alphanumeric naming warning. Versioning no longer warns
   "Version segment exists but no dynamic resource parameter is found" on every static

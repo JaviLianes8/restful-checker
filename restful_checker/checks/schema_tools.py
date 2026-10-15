@@ -26,6 +26,32 @@ def _schemas(schema: Any) -> list[dict[str, Any]]:
     return found
 
 
+def declares_type(schema: Any) -> bool:
+    """Tell whether a schema says what its values are: a ``type``, an ``enum`` or a ``const``,
+    itself or in every member of a ``oneOf``/``anyOf``, or in one of its ``allOf`` members.
+
+    >>> declares_type({"oneOf": [{"type": "string"}, {"type": "array"}]})
+    True
+    >>> declares_type({"description": "anything"})
+    False
+    """
+    for node in _schemas(schema):
+        if any(key in node for key in ("type", "enum", "const")):
+            return True
+        for key in ("oneOf", "anyOf"):
+            members = node.get(key)
+            if (
+                isinstance(members, list)
+                and members
+                and all(
+                    isinstance(m, dict) and any(k in m for k in ("type", "enum", "const"))
+                    for m in members
+                )
+            ):
+                return True
+    return False
+
+
 def merged_properties(schema: Any) -> dict[str, Any] | None:
     """Return the properties a schema declares itself or through ``allOf``.
 

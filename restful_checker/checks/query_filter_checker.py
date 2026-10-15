@@ -6,6 +6,15 @@ import re
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.schema_tools import declares_type
+
+
+def _typed(param: dict[str, Any]) -> bool:
+    if declares_type(param.get("schema")) or "enum" in param:
+        return True
+    content = param.get("content")
+    media = list(content.values()) if isinstance(content, dict) else []
+    return any(isinstance(m, dict) and declares_type(m.get("schema")) for m in media)
 
 
 def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
@@ -58,7 +67,8 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
         for param in query_params:
             name = param.get("name", "")
             schema = param.get("schema", {})
-            # OpenAPI 2.0 puts `type` on the parameter itself, 3.x inside `schema`.
+            # OpenAPI 2.0 puts `type` on the parameter itself, 3.x inside `schema` (or in the
+            # schema of its one `content` media type).
             param_type = schema.get("type") if isinstance(schema, dict) else None
             param_type = param_type or param.get("type")
 
@@ -66,7 +76,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
                 result.warning(
                     f"Query parameter `{name}` has type `object`, consider using primitives"
                 )
-            elif not param_type:
+            elif not param_type and not _typed(param):
                 result.warning(f"Query parameter `{name}` has no defined type")
 
     if not result.messages:
