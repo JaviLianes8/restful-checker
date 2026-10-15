@@ -35,8 +35,7 @@ def run(*command: str | Path, cwd: Path) -> str:
 
 def test_installed_wheel(tmp_path: Path) -> None:
     dist = tmp_path / "dist"
-    run(sys.executable, "-m", "pip", "wheel", "--no-deps", "-w", dist, ROOT, cwd=tmp_path)
-    run(sys.executable, "setup.py", "-q", "sdist", "-d", dist, cwd=ROOT)
+    run(sys.executable, "-m", "build", "--sdist", "--wheel", "--outdir", dist, ROOT, cwd=tmp_path)
     wheel = next(dist.glob("*.whl"))
     names = zipfile.ZipFile(wheel).namelist()
     assert "restful_checker/data/style.css" in names

@@ -87,7 +87,7 @@ def test_css_is_inlined_and_failure_is_tolerated(
 
 
 def test_css_reader_without_importlib_files(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delattr("importlib.resources.files")
+    monkeypatch.delattr("importlib.resources.files", raising=False)  # absent on 3.8
     assert "box-sizing" in html_report._read_css()
     monkeypatch.setattr("pkgutil.get_data", lambda *_: None)
     with pytest.raises(FileNotFoundError):
