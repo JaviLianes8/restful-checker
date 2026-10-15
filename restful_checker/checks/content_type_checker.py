@@ -6,11 +6,16 @@ from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
 
+# Sequences of JSON values (OpenAPI 3.2 sequential media types: JSON Lines, NDJSON and the
+# RFC 7464 JSON text sequence).
+JSON_SEQUENCES = frozenset({"application/jsonl", "application/x-ndjson", "application/json-seq"})
+
 
 def is_json_media_type(media_type: object) -> bool:
     """Tell whether a media type is JSON: application/json, with or without parameters,
     or any type with the +json structured syntax suffix (RFC 6839), such as
-    application/problem+json (RFC 9457).
+    application/problem+json (RFC 9457), or a sequence of JSON values
+    (``application/jsonl``, ``application/x-ndjson``, ``application/json-seq``).
 
     >>> is_json_media_type("application/json; charset=utf-8"), is_json_media_type("text/xml")
     (True, False)
@@ -18,7 +23,9 @@ def is_json_media_type(media_type: object) -> bool:
     if not isinstance(media_type, str):
         return False
     essence = media_type.split(";", 1)[0].strip().lower()
-    return essence == "application/json" or ("/" in essence and essence.endswith("+json"))
+    if essence in JSON_SEQUENCES or essence == "application/json":
+        return True
+    return "/" in essence and essence.endswith(("+json", "+json-seq"))
 
 
 # Bodies that have no JSON form: files and multipart uploads.
@@ -33,8 +40,9 @@ def is_binary_media_type(media_type: object, media: object = None) -> bool:
 
     That is ``application/octet-stream``, ``application/pdf``, ``application/zip``,
     ``application/gzip``, any ``image``, ``audio``, ``video``, ``font`` or ``multipart``
-    type, or any media type whose schema is ``type: string`` with ``format: binary``
-    (the OpenAPI 3.0 way of describing file contents).
+    type, any ``+zip`` type, or any media type whose schema is ``type: string`` with
+    ``format: binary`` (OpenAPI 3.0) or has a ``contentMediaType`` without a
+    ``contentEncoding`` (OpenAPI 3.1 and later).
 
     >>> is_binary_media_type("multipart/form-data"), is_binary_media_type("text/csv")
     (True, False)
@@ -46,11 +54,14 @@ def is_binary_media_type(media_type: object, media: object = None) -> bool:
     essence = media_type.split(";", 1)[0].strip().lower()
     if essence in BINARY_MEDIA_TYPES or essence.startswith(BINARY_TOP_LEVEL):
         return True
+    if essence.endswith("+zip"):
+        return True
     schema = media.get("schema") if isinstance(media, dict) else None
-    return isinstance(schema, dict) and (schema.get("type"), schema.get("format")) == (
-        "string",
-        "binary",
-    )
+    if not isinstance(schema, dict):
+        return False
+    if "contentMediaType" in schema and "contentEncoding" not in schema:
+        return True  # OpenAPI 3.1 and later describe raw file contents this way
+    return (schema.get("type"), schema.get("format")) == ("string", "binary")
 
 
 def _accepted(content: dict[Any, Any]) -> tuple[bool, bool]:

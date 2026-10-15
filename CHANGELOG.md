@@ -43,7 +43,10 @@ listed.
   the `default`), so `{scheme}://host` with `default: https` passes and with
   `enum: [https, http]` is "Not all servers use HTTPS"; a variable without a value in the
   scheme part warns "A server URL uses a variable without a default or enum". The scheme
-  is compared ignoring case and `wss://` counts as secure.
+  is compared ignoring case and `wss://` counts as secure. Servers given on a Path Item or
+  an Operation (and Swagger 2.0 `schemes` given on an Operation) are judged too, so plain
+  HTTP there is "Not all servers use HTTPS" even when the document's own servers are
+  HTTPS.
 - Response examples count an `example` or `examples` on the schema (also through `allOf`).
 - Query filters no longer call a parameter untyped when its schema says what it holds
   through `enum`, `const`, `oneOf`/`anyOf` members that all have a type, or an `allOf`

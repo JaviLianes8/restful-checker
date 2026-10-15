@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.server_levels import nested_lists
 
 SECURE_SCHEMES = frozenset({"https", "wss"})
 # A server URL with more combinations of variable values than this is read with the
@@ -89,21 +90,27 @@ def _kind(url: str) -> str:
 def _swagger2(openapi_data: dict[str, Any], result: CheckResult) -> None:
     # Swagger 2.0 has `schemes` (and `host`), never `servers`. Without schemes the API uses
     # the scheme the document itself is served with.
+    # Operations may override them with their own `schemes`.
     schemes = openapi_data.get("schemes")
-    if not isinstance(schemes, list) or not schemes:
-        result.success("No schemes listed: the API uses the scheme of the document")
-    elif all(isinstance(s, str) and s.lower() in SECURE_SCHEMES for s in schemes):
-        result.success("All servers use HTTPS")
-    else:
+    top = schemes if isinstance(schemes, list) else []
+    every = [*top, *(s for listed in nested_lists(openapi_data, "schemes") for s in listed)]
+    if not all(isinstance(s, str) and s.lower() in SECURE_SCHEMES for s in every):
         result.error("Not all servers use HTTPS")
+    elif not top:
+        result.success("No schemes listed: the API uses the scheme of the document")
+    else:
+        result.success("All servers use HTTPS")
 
 
 def check_https_usage(openapi_data: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that all server URLs in the OpenAPI spec use HTTPS.
 
-    OpenAPI 3 ``servers`` are read with their variables; relative URLs are served with the
-    scheme of the document. A Swagger 2.0 document is judged by its ``schemes``.
+    OpenAPI 3 ``servers`` are read with their variables, from the document and from every
+    Path Item and Operation that overrides them; relative URLs are served with the scheme of
+    the document. A Swagger 2.0 document is judged by its ``schemes`` and those of its
+    Operations. Plain HTTP anywhere is an error; a document without top-level servers
+    warns, although OpenAPI then defaults to ``/``, so that the server is declared.
 
     >>> check_https_usage({"openapi": "3.1.0", "servers": [{"url": "https://api.example.com"}]})
     (['✅ All servers use HTTPS'], 1.0)
@@ -118,20 +125,21 @@ def check_https_usage(openapi_data: dict[str, Any]) -> tuple[list[str], float]:
     """
     result = CheckResult("SSL")
     servers = openapi_data.get("servers", [])
+    top = servers if isinstance(servers, list) else []
+    nested = [s for listed in nested_lists(openapi_data, "servers") for s in listed]
+    kinds = [server_kind(server) for server in [*top, *nested]]
 
     if "servers" not in openapi_data and "swagger" in openapi_data:
         _swagger2(openapi_data, result)
-    elif not servers or not isinstance(servers, list):
+    elif "insecure" in kinds:
+        result.error("Not all servers use HTTPS")
+    elif not top:
         result.warning("No servers defined in OpenAPI spec")
+    elif "unresolved" in kinds:
+        result.warning("A server URL uses a variable without a default or enum")
+    elif "relative" in kinds:
+        result.success("All servers use HTTPS or a URL relative to the document")
     else:
-        kinds = [server_kind(server) for server in servers]
-        if "insecure" in kinds:
-            result.error("Not all servers use HTTPS")
-        elif "unresolved" in kinds:
-            result.warning("A server URL uses a variable without a default or enum")
-        elif "relative" in kinds:
-            result.success("All servers use HTTPS or a URL relative to the document")
-        else:
-            result.success("All servers use HTTPS")
+        result.success("All servers use HTTPS")
 
     return result.messages, result.finalize_score()

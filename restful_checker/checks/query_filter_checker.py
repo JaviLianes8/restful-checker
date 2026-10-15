@@ -9,6 +9,12 @@ from restful_checker.checks.check_result import CheckResult
 from restful_checker.checks.schema_tools import declares_type
 
 
+def _useful(name: object, useful_names: set[str]) -> bool:
+    # JSON:API reserves the `filter[...]` family for filtering.
+    lowered = str(name if name is not None else "").lower()
+    return lowered in useful_names or (lowered.startswith("filter[") and lowered.endswith("]"))
+
+
 def _typed(param: dict[str, Any]) -> bool:
     if declares_type(param.get("schema")) or "enum" in param:
         return True
@@ -56,7 +62,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
         )
     else:
         useful_names = {"filter", "status", "type", "sort", "limit"}
-        has_meaningful = any(str(p.get("name", "")).lower() in useful_names for p in query_params)
+        has_meaningful = any(_useful(p.get("name"), useful_names) for p in query_params)
 
         if not has_meaningful:
             result.warning(

@@ -10,14 +10,16 @@ from restful_checker.checks.schema_tools import merged_properties
 # The members RFC 9457 defines for a problem details object.
 PROBLEM_MEMBERS = frozenset({"type", "title", "status", "detail", "instance"})
 PROBLEM_MEDIA_TYPE = "application/problem+json"
+PROBLEM_MEDIA_TYPES = frozenset({PROBLEM_MEDIA_TYPE, "application/problem+xml"})
 
 
 def is_structured_error(media_type: object, schema: Any) -> bool:
     """Tell whether an error body has a structured format.
 
-    It does when it is served as ``application/problem+json`` (RFC 9457 defines its
-    members), when its schema has both ``code`` and ``message``, or when its schema has at
-    least two problem details members. Properties given through ``allOf`` count.
+    It does when it is served as ``application/problem+json`` or ``application/problem+xml``
+    (RFC 9457 defines their members), when its schema has both ``code`` and ``message``, or
+    when its schema has at least two problem details members. Properties given through
+    ``allOf`` count.
 
     >>> is_structured_error("application/json", {"properties": {"title": {}, "status": {}}})
     True
@@ -26,7 +28,7 @@ def is_structured_error(media_type: object, schema: Any) -> bool:
     """
     if isinstance(media_type, str):
         essence = media_type.split(";", 1)[0].strip().lower()
-        if essence == PROBLEM_MEDIA_TYPE:
+        if essence in PROBLEM_MEDIA_TYPES:
             return True
     properties = merged_properties(schema) or {}
     if "code" in properties and "message" in properties:

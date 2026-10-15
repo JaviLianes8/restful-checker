@@ -9,6 +9,7 @@ document passed in is never modified.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 from urllib.parse import unquote
 
@@ -20,16 +21,33 @@ _MAX_HOPS = 32
 # (a member list repeating one reference at every level would otherwise grow exponentially).
 _MAX_EXPANSIONS = 256
 COMPOSITION_KEYS = ("allOf", "oneOf", "anyOf")
+_INDEX = re.compile(r"0|[1-9][0-9]*")
+
+
+def _siblings_apply(root: Any) -> bool:
+    # From OpenAPI 3.1 a Schema Object is JSON Schema 2020-12, where keywords next to a
+    # `$ref` apply too; 2.0 and 3.0 ignore them.
+    version = root.get("openapi") if isinstance(root, dict) else None
+    return isinstance(version, str) and version.startswith("3.") and not version.startswith("3.0")
+
+
+def _target(schema: Any, root: Any) -> Any:
+    target = resolve(schema, root)
+    if target is schema or not isinstance(target, dict) or not _siblings_apply(root):
+        return target
+    return {**target, **{key: value for key, value in schema.items() if key != "$ref"}}
 
 
 def _pointer(root: Any, ref: str) -> Any:
     """Return the node a local reference such as ``#/components/schemas/User`` names."""
     node = root
-    for token in ref[2:].split("/") if ref != "#" else []:
-        token = unquote(token).replace("~1", "/").replace("~0", "~")
+    # RFC 6901 section 6: the fragment is percent-decoded first, then split and unescaped.
+    pointer = unquote(ref[1:])
+    for token in pointer[1:].split("/") if pointer else []:
+        token = token.replace("~1", "/").replace("~0", "~")
         if isinstance(node, dict) and token in node:
             node = node[token]
-        elif isinstance(node, list) and token.isdigit() and int(token) < len(node):
+        elif isinstance(node, list) and _INDEX.fullmatch(token) and int(token) < len(node):
             node = node[int(token)]
         else:
             return None
@@ -91,7 +109,7 @@ def _expand(node: Any, root: Any, budget: list[int], refs: tuple[str, ...]) -> A
                 expanded.append(member)  # a schema built from itself: leave the cycle closed
                 continue
             chain = (*refs, ref) if isinstance(ref, str) else refs
-            expanded.append(_expand(resolve(member, root), root, budget, chain))
+            expanded.append(_expand(_target(member, root), root, budget, chain))
         result = {**result, key: expanded}
     return result
 
@@ -101,7 +119,7 @@ def _schema(schema: Any, root: Any) -> Any:
     members."""
     ref = schema.get("$ref") if isinstance(schema, dict) else None
     refs = (ref,) if isinstance(ref, str) else ()
-    return _expand(resolve(schema, root), root, [_MAX_EXPANSIONS], refs)
+    return _expand(_target(schema, root), root, [_MAX_EXPANSIONS], refs)
 
 
 def _media(content: Any, root: Any) -> dict[Any, Any]:
@@ -110,8 +128,9 @@ def _media(content: Any, root: Any) -> dict[Any, Any]:
     result: dict[Any, Any] = {}
     for media_type, media in content.items():
         media = resolve(media, root)
-        if isinstance(media, dict) and "schema" in media:
-            media = {**media, "schema": _schema(media["schema"], root)}
+        for key in ("schema", "itemSchema"):  # `itemSchema`: sequential media types (3.2)
+            if isinstance(media, dict) and key in media:
+                media = {**media, key: _schema(media[key], root)}
         result[media_type] = media
     return result
 

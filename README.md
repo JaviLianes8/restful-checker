@@ -69,22 +69,30 @@ text as is).
 |-------|-------------|
 | HTTP Methods | GET, POST, PUT, PATCH, DELETE semantics; HEAD, OPTIONS, TRACE and QUERY are accepted |
 | Status Codes | Expected codes per method (200, 201, 204, 400, 404, 409); ranges such as `2XX` count for every code of their class |
-| Content Types | JSON bodies (`application/json`, `+json` types); binary and multipart bodies are accepted |
-| HTTPS Enforcement | OpenAPI 3 servers, with variables and relative URLs; Swagger 2.0 `schemes` |
+| Content Types | JSON bodies (`application/json`, `+json` types, JSON Lines and JSON sequences); binary and multipart bodies are accepted (see `is_binary_media_type`) |
+| HTTPS Enforcement | OpenAPI 3 servers of the document, its paths and operations, with variables and relative URLs; Swagger 2.0 `schemes`, also per operation |
 
 ### Response Quality
 | Check | Description |
 |-------|-------------|
 | Response Examples | `example` or `examples` on the media type or its schema (also through `allOf`) |
-| Error Format | `code` and `message` fields, or RFC 9457 problem details (`application/problem+json`, or two of `type`, `title`, `status`, `detail`, `instance`), also through `allOf` |
+| Error Format | `code` and `message` fields, or RFC 9457 problem details (`application/problem+json` or `+xml`, or two of `type`, `title`, `status`, `detail`, `instance`), also through `allOf` |
 
 ### Performance
 | Check | Description |
 |-------|-------------|
 | Pagination | `page`, `limit`, `offset`, `cursor`, `per_page`, `page_size`, `page_token` (or camel case) or JSON:API `page[...]` on collection GETs |
-| Query Filters | Filters like `?status=` on collection GETs |
+| Query Filters | Filters like `?status=` or JSON:API `filter[...]` on collection GETs, with a declared type |
 
-### Limitations
+### Limitations and choices
+
+- The expected status codes are this tool's conventions and stricter than RFC 9110: PUT and
+  PATCH are asked for 200 and 204, and a DELETE returning 200 without 204 is an error,
+  where the RFC allows 200 or 204 for an update and 200, 202 or 204 for a deletion.
+- An OpenAPI 3 document without top-level `servers` gets a warning, although the
+  specification then defaults to `/`: declaring the server is the advice.
+- Version segments with a minor or patch number (`v1.2`) are accepted, although some style
+  guides (Google AIP-185) expose only the major version.
 
 - Only local references (`#/components/...`) are followed. References to other files or
   URLs (`common.yaml#/Error`) are left unresolved, so whatever they hold is not checked.

@@ -51,6 +51,7 @@ def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[st
                     "example" in media
                     or "examples" in media
                     or schema_has_example(media.get("schema"))
+                    or schema_has_example(media.get("itemSchema"))
                 )
                 for media in content.values()
             )
