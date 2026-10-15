@@ -76,6 +76,8 @@ def test_non_operation_entries_are_skipped() -> None:
         (ops(get=["200"]), "missing expected status codes: 404", 0.8),
         (ops(post=["200", "400", "409"]), "should return 201", 0.0),
         (ops(post=["201", "204", "400", "409"]), "includes 204", 0.8),
+        (ops(post=["200", "201", "400", "409"]), "Status code definitions look valid", 1.0),
+        (ops(delete=["200", "204", "404"]), "Status code definitions look valid", 1.0),
         (ops(delete=["200", "404"]), "should return 204", 0.0),
         (ops(patch=["400", "404"]), "missing 200 or 204", 0.6),
     ],

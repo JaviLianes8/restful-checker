@@ -113,6 +113,7 @@ YAML_SPEC = "openapi: 3.0.3\ninfo: {title: café, version: '1'}\npaths: {}\n".en
         ("https://a.example/openapi", YAML_SPEC, ".yaml"),
         ("https://a.example/openapi.YML", YAML_SPEC, ".yaml"),
         ("https://a.example/openapi", b'{"openapi": "3.0.3"}', ".json"),
+        ("https://a.example/openapi.yaml", b'{"openapi": "3.0.3"}', ".yaml"),
         ("https://a.example/x.json?v=2", b'{"openapi": "3.0.3"}', ".json"),
     ],
 )

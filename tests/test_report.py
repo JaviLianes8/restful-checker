@@ -67,6 +67,22 @@ def test_round_trip(tmp_path: Path) -> None:
     assert out.with_suffix(".json").is_file()
 
 
+@pytest.mark.parametrize(
+    ("score", "css"),
+    [(0.45, "section-error"), (0.5, "section-warn"), (0.65, "section-warn"), (0.7, "section-ok")],
+)
+def test_section_colour_thresholds(tmp_path: Path, score: float, css: str) -> None:
+    report = [{"title": "/x", "items": [], "score": score}]
+    html = Path(generate_html(report, 1, output=tmp_path / "r.html")).read_text(encoding="utf-8")
+    assert f"class='section {css}'" in html
+
+
+def test_methods_line_reading_none(tmp_path: Path) -> None:
+    report = [{"title": "/x", "items": ["<strong>HTTP methods:</strong> none"], "score": 1.0}]
+    out = Path(generate_html(report, 1, output=tmp_path / "r.html"))
+    assert "httpMethods" not in extract_json_from_html(out)["sections"][0]
+
+
 def test_no_json_when_not_asked(tmp_path: Path) -> None:
     generate_html([], 100, output=tmp_path / "r.html", write_json=False)
     assert not (tmp_path / "r.json").exists()

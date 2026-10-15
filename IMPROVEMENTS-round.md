@@ -11,8 +11,9 @@ Progress:
 - [x] Python 3.8 and 3.9 import and run
 - [x] Tests and coverage, contracts, pinned sources
 - [x] Typing: mypy --strict, py.typed
-- [ ] Gates: ruff format, ruff check, mypy --strict, pytest
-- [ ] Mutation run
+- [x] Docs: README factual fixes, CHANGELOG
+- [x] Gates: ruff format, ruff check, mypy --strict, pytest
+- [x] Mutation run (first pass; rerun after the review)
 - [ ] Independent review findings fixed
 - [ ] Pull request opened, guard clean
 

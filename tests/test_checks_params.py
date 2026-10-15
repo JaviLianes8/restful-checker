@@ -68,6 +68,8 @@ def test_filters_read_swagger_2_parameter_type() -> None:
 def test_nesting() -> None:
     assert check_resource_nesting("/users", {})[0] == ["✅ Path too shallow to check nesting."]
     assert check_resource_nesting("/users/{id}/orders", {})[1] == 1.0
+    assert check_resource_nesting("/users/profile", {})[1] == 1.0
+    assert check_resource_nesting("/user/orders", {})[1] == 1.0
     messages, score = check_resource_nesting("/users/orders", {})
     assert any("missing parent ID" in m for m in messages)
     assert score == 0.0

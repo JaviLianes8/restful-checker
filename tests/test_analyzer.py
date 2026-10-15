@@ -10,6 +10,7 @@ import pytest
 from conftest import all_messages, document, ok_operation, write_json
 
 from restful_checker import analyze_api
+from restful_checker.engine.analyzer import _per_path
 
 
 def run(tmp_path: Path, doc: Any, name: str = "openapi.json") -> dict[str, Any]:
@@ -40,6 +41,14 @@ def test_item_paths_are_checked_against_their_own_operations(tmp_path: Path) -> 
     texts = [m["message"] for m in all_messages(report, "Status Codes")]
     assert "GET /v1/users/{userId} is missing expected status codes: 200, 404" in texts
     assert section(report, "/v1/users/{id}")["score"] < 100
+
+
+def test_item_paths_get_no_filter_section(tmp_path: Path) -> None:
+    doc = document({"/v1/users/{id}": {"get": ok_operation("200", "404")}})
+    report = run(tmp_path, doc)["json_report"]
+    categories = [item["category"] for item in section(report, "/v1/users/{id}")["items"]]
+    assert "Filters" not in categories
+    assert categories.count("Pagination") == 1
 
 
 def test_trailing_slash_paths_are_checked(tmp_path: Path) -> None:
@@ -112,6 +121,16 @@ def test_several_routes_in_one_group(tmp_path: Path) -> None:
     report = run(tmp_path, doc)["json_report"]
     assert len(report["sections"]) == 3
     assert any("GET /v1/users/" in m["message"] for m in all_messages(report, "Status Codes"))
+    texts = [m["message"] for m in all_messages(report, "Status Codes")]
+    assert "Status code definitions look valid" in texts
+
+
+def test_routes_of_a_group_are_averaged() -> None:
+    def check(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
+        return [path], methods["score"]
+
+    paths = {"/b": {"score": 0.2}, "/a": {"score": 1.0}, "/c": {"score": 0.6}}
+    assert _per_path(check, {"/c", "/a", "/b"}, paths) == (["/a", "/b", "/c"], 0.6)
 
 
 def test_score_and_global_sections(tmp_path: Path) -> None:

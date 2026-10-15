@@ -150,6 +150,16 @@ def test_long_reference_chain_stops() -> None:
     assert resolve({"$ref": "#/r10"}, root) == {"end": True}
 
 
+def test_pointer_unescapes_tilde_one_before_tilde_zero() -> None:
+    # RFC 6901: "~01" names the key "~1", not "/".
+    root = {"a~1b": 1, "a/b": 2}
+    assert resolve({"$ref": "#/a~01b"}, root) == 1
+
+
+def test_operation_keys_in_capitals_are_still_read() -> None:
+    assert list(normalize_paths({"paths": {"/a": {"GET": {}}}})["/a"]) == ["GET"]
+
+
 def test_json_pointer_escapes_and_arrays() -> None:
     root = {"paths": {"/a/b": {"get": 1}}, "t~n": [10, 20], "%": 3}
     assert resolve({"$ref": "#/paths/~1a~1b/get"}, root) == 1
