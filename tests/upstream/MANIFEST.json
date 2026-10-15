@@ -1,0 +1,74 @@
+{
+  "oas-2.0.md": {
+    "title": "Swagger/OpenAPI Specification 2.0",
+    "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/ffb3e579dfb4ef5ae1a68d11af125e2a593505fc/versions/2.0.md",
+    "revision": "OAI/OpenAPI-Specification commit ffb3e579dfb4ef5ae1a68d11af125e2a593505fc",
+    "licence": "Apache License 2.0 (https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 80699,
+    "sha256": "57bf00dfabdb79634e2886e022f3c6195296682b237ed4a56c7fc631c85b3c91"
+  },
+  "oas-3.0.4.md": {
+    "title": "OpenAPI Specification 3.0.4",
+    "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/ffb3e579dfb4ef5ae1a68d11af125e2a593505fc/versions/3.0.4.md",
+    "revision": "OAI/OpenAPI-Specification commit ffb3e579dfb4ef5ae1a68d11af125e2a593505fc",
+    "licence": "Apache License 2.0 (https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 194950,
+    "sha256": "77af0760571a228e61ca2126d6f4de9efcf053d5dcfb7f0ad2f84d7ecf622ff6"
+  },
+  "oas-3.1.2.md": {
+    "title": "OpenAPI Specification 3.1.2",
+    "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/ffb3e579dfb4ef5ae1a68d11af125e2a593505fc/versions/3.1.2.md",
+    "revision": "OAI/OpenAPI-Specification commit ffb3e579dfb4ef5ae1a68d11af125e2a593505fc",
+    "licence": "Apache License 2.0 (https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 221889,
+    "sha256": "7e30126d65acad53523f420e522d34edb3717af225aae727e73a522abc227da7"
+  },
+  "oas-3.2.1.md": {
+    "title": "OpenAPI Specification 3.2.1",
+    "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/ffb3e579dfb4ef5ae1a68d11af125e2a593505fc/versions/3.2.1.md",
+    "revision": "OAI/OpenAPI-Specification commit ffb3e579dfb4ef5ae1a68d11af125e2a593505fc",
+    "licence": "Apache License 2.0 (https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 298132,
+    "sha256": "01fadb4ce8253fa70b962e1a04cb73c549f2fe98c6311dff2b323cac6e322fad"
+  },
+  "rfc9110.txt": {
+    "title": "RFC 9110, HTTP Semantics (June 2022)",
+    "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+    "revision": "RFC 9110 as published (RFCs are immutable)",
+    "licence": "IETF Trust Legal Provisions (https://trustee.ietf.org/license-info)",
+    "fetched": "2026-10-15",
+    "size": 502941,
+    "sha256": "21c1cdce6ab0e5509b04d84a28000836c7a087cf786efe6f04877ebfff47232a"
+  },
+  "rfc6839.txt": {
+    "title": "RFC 6839, Additional Media Type Structured Syntax Suffixes (January 2013)",
+    "url": "https://www.rfc-editor.org/rfc/rfc6839.txt",
+    "revision": "RFC 6839 as published (RFCs are immutable)",
+    "licence": "IETF Trust Legal Provisions (https://trustee.ietf.org/license-info)",
+    "fetched": "2026-10-15",
+    "size": 26071,
+    "sha256": "f754a5e85371359a1b6609427ab9a759dc012af7f656a8741fdac4942abf8c13"
+  },
+  "rfc9457.txt": {
+    "title": "RFC 9457, Problem Details for HTTP APIs (July 2023)",
+    "url": "https://www.rfc-editor.org/rfc/rfc9457.txt",
+    "revision": "RFC 9457 as published (RFCs are immutable)",
+    "licence": "IETF Trust Legal Provisions (https://trustee.ietf.org/license-info)",
+    "fetched": "2026-10-15",
+    "size": 34106,
+    "sha256": "f2b3db92fb0bf3489cb3841a0da0c0d88dff40797b64d40b6123085183886c7b"
+  },
+  "rfc8259.txt": {
+    "title": "RFC 8259, The JSON Data Interchange Format (December 2017)",
+    "url": "https://www.rfc-editor.org/rfc/rfc8259.txt",
+    "revision": "RFC 8259 as published (RFCs are immutable)",
+    "licence": "IETF Trust Legal Provisions (https://trustee.ietf.org/license-info)",
+    "fetched": "2026-10-15",
+    "size": 28360,
+    "sha256": "61a5378f4255c720beb2a4b4a63b29540147c140f36988bf086291989b4cd2d7"
+  }
+}
