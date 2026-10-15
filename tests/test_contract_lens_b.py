@@ -123,3 +123,31 @@ def test_json_api_filter_family(tmp_path: Path, name: str) -> None:
     result = analyze_api(write_json(tmp_path, doc), output_dir=tmp_path)["json_report"]
     texts = [m["message"] for m in all_messages(result, "Filters")]
     assert texts == ["Collection endpoints support query filters"]
+
+
+def test_sibling_keywords_apply_together_with_the_target(tmp_path: Path) -> None:
+    components = {"schemas": {"Coded": {"properties": {"code": {}}},
+                              "Base": {"allOf": [{"properties": {"code": {}}}]}}}  # fmt: skip
+    responses = {
+        "404": {"$ref": "#/components/schemas/Coded", "properties": {"message": {}}},
+        "409": {"$ref": "#/components/schemas/Base", "allOf": [{"properties": {"message": {}}}]},
+    }
+    get = {"responses": {code: {"content": {"application/json": {"schema": schema}}}
+                         for code, schema in responses.items()}}  # fmt: skip
+    doc = document({"/v1/a": {"get": get}}, components=components, openapi="3.1.0")
+    result = analyze_api(write_json(tmp_path, doc), output_dir=tmp_path)["json_report"]
+    texts = [m["message"] for m in all_messages(result, "Error Format")]
+    assert texts == ["All error responses use 'code' and 'message' or problem details"]
+
+
+def test_text_content_is_not_binary() -> None:
+    csv = {"schema": {"type": "string", "contentMediaType": "text/csv"}}
+    assert not is_binary_media_type("text/csv", csv)
+    assert not is_binary_media_type("text/csv", {"schema": {"contentMediaType": "text/csv"}})
+    typed = {"schema": {"type": "string", "contentMediaType": "application/zip"}}
+    assert not is_binary_media_type("application/x-custom", typed)
+
+
+def test_upper_case_operations_carry_servers() -> None:
+    doc = oas3({"GET": {"servers": [{"url": "http://plain.example.com"}]}})
+    assert check_https_usage(doc) == ERROR

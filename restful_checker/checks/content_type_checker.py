@@ -41,8 +41,8 @@ def is_binary_media_type(media_type: object, media: object = None) -> bool:
     That is ``application/octet-stream``, ``application/pdf``, ``application/zip``,
     ``application/gzip``, any ``image``, ``audio``, ``video``, ``font`` or ``multipart``
     type, any ``+zip`` type, or any media type whose schema is ``type: string`` with
-    ``format: binary`` (OpenAPI 3.0) or has a ``contentMediaType`` without a
-    ``contentEncoding`` (OpenAPI 3.1 and later).
+    ``format: binary`` (OpenAPI 3.0) or, outside ``text/*``, has a ``contentMediaType`` and
+    neither ``type`` nor ``contentEncoding`` (raw file contents in OpenAPI 3.1 and later).
 
     >>> is_binary_media_type("multipart/form-data"), is_binary_media_type("text/csv")
     (True, False)
@@ -59,7 +59,8 @@ def is_binary_media_type(media_type: object, media: object = None) -> bool:
     schema = media.get("schema") if isinstance(media, dict) else None
     if not isinstance(schema, dict):
         return False
-    if "contentMediaType" in schema and "contentEncoding" not in schema:
+    raw = "contentMediaType" in schema and not {"contentEncoding", "type"} & set(schema)
+    if raw and not essence.startswith("text/"):
         return True  # OpenAPI 3.1 and later describe raw file contents this way
     return (schema.get("type"), schema.get("format")) == ("string", "binary")
 

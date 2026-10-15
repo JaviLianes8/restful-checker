@@ -35,7 +35,8 @@ def _target(schema: Any, root: Any) -> Any:
     target = resolve(schema, root)
     if target is schema or not isinstance(target, dict) or not _siblings_apply(root):
         return target
-    return {**target, **{key: value for key, value in schema.items() if key != "$ref"}}
+    siblings = {key: value for key, value in schema.items() if key != "$ref"}
+    return {"allOf": [target, siblings]}  # both apply: neither replaces the other
 
 
 def _pointer(root: Any, ref: str) -> Any:

@@ -30,8 +30,8 @@ listed.
 - Binary and multipart bodies are accepted by Content Types: `application/octet-stream`,
   `application/pdf`, `application/zip`, `application/gzip`, any `image`, `audio`, `video`,
   `font` or `multipart` type, any `+zip` type, and any media type whose schema is
-  `type: string, format: binary` (OpenAPI 3.0) or has a `contentMediaType` without a
-  `contentEncoding` (OpenAPI 3.1). When one of them was accepted the success line reads "All request and
+  `type: string, format: binary` (OpenAPI 3.0) or, outside `text/*`, has a
+  `contentMediaType` and neither `type` nor `contentEncoding` (OpenAPI 3.1). When one of them was accepted the success line reads "All request and
   response bodies use application/json, binary or multipart types".
   `application/x-www-form-urlencoded`, `text/*` and XML bodies are still errors.
 - JSON Lines (`application/jsonl`, `application/x-ndjson`) and JSON text sequences
@@ -103,7 +103,8 @@ listed.
   status codes, content types, examples and error format. Before, these checks looked the
   route up by its grouped name and always passed.
 - In OpenAPI 3.1 and 3.2 documents, keywords next to a schema `$ref` (`examples`,
-  `properties`) apply, as JSON Schema 2020-12 says; 2.0 and 3.0 still ignore them.
+  `properties`) apply together with the referenced schema, as JSON Schema 2020-12 says;
+  2.0 and 3.0 still ignore them.
 - Local references are read as RFC 6901 says: the fragment is percent-decoded before it is
   split (`#/a%2Fb` is `a` then `b`), and array indexes are plain ASCII digits without a
   leading zero.

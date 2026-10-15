@@ -8,7 +8,8 @@ from restful_checker.engine.normalizer import OPERATION_KEYS, resolve
 
 
 def _operations(item: dict[str, Any], root: Any) -> list[Any]:
-    found = [item[key] for key in OPERATION_KEYS if key in item]
+    # Field names are read ignoring case, as the normalizer reads them (`GET` counts).
+    found = [value for key, value in item.items() if str(key).lower() in OPERATION_KEYS]
     extra = item.get("additionalOperations")
     if isinstance(extra, dict):
         found.extend(extra.values())
