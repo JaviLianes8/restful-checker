@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from html import escape
 from pathlib import Path
 from typing import Any, Callable, List, Tuple
@@ -34,6 +35,9 @@ def _per_path(
     # normalised name (`{id}`, no trailing slash) is not a key of the Paths Object.
     runs = [check(raw, paths.get(raw, {})) for raw in sorted(raw_paths)]
     messages = [message for run_messages, _ in runs for message in run_messages]
+    if len(runs) > 1:
+        # Routes of one group (`/users`, `/users/`) repeat the same success line; keep it once.
+        messages = list(dict.fromkeys(messages))
     return messages, sum(score for _, score in runs) / len(runs)
 
 
@@ -65,7 +69,7 @@ def _analyze_group(
     # Analyze each raw path (used for GETs, filters, nesting, etc.)
     for raw_path in sorted(raw):
         path_obj = paths.get(raw_path, {})
-        if "get" in path_obj and not raw_path.endswith("}"):
+        if "get" in path_obj and not re.search(r"/\{[^}]+}/?$", raw_path):
             process_section("Filters", check_query_filters(raw_path, path_obj))
         process_section("Pagination", check_pagination(raw_path, path_obj))
         process_section("Resource Nesting", check_resource_nesting(raw_path, path_obj))

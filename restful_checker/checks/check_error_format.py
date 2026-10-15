@@ -24,12 +24,16 @@ def check_error_format(path: str, methods: dict[str, Any]) -> tuple[list[str], f
         if not isinstance(operation, dict):
             continue
 
-        responses = operation.get("responses") or {}
+        responses = operation.get("responses")
+        if not isinstance(responses, dict):
+            continue
         for status_code, response in responses.items():
             if not isinstance(response, dict):
                 continue
             if status_code == "default" or str(status_code).startswith(("4", "5")):
-                content = response.get("content") or {}
+                content = response.get("content")
+                if not isinstance(content, dict):
+                    continue
                 for media_info in content.values():
                     evaluated = True
                     schema = media_info.get("schema", {}) if isinstance(media_info, dict) else {}

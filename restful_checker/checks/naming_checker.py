@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.verb_words import starts_with_verb
 from restful_checker.checks.version_checker import VERSION_REGEX
 
 COMMON_VERBS = ["get", "create", "update", "delete", "post", "put", "fetch", "make", "do", "add"]
@@ -13,19 +14,10 @@ PREPOSITIONS = {"of", "for", "by", "with", "from", "to"}
 # === Individual Checks ===
 
 
-def _starts_with_verb(segment: str, verb: str) -> bool:
-    # The verb must be a word of its own: `getUsers`, `get_users`, `create`; a noun that
-    # merely starts with the same letters (`posts`, `documents`, `addresses`) is not one.
-    if not re.fullmatch(rf"{verb}[A-Za-z0-9_]*", segment, re.IGNORECASE):
-        return False
-    rest = segment[len(verb) :]
-    return not rest or rest[0].isupper() or rest[0].isdigit() or rest[0] == "_"
-
-
 def check_contains_verb(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         for verb in COMMON_VERBS:
-            if _starts_with_verb(segment, verb):
+            if starts_with_verb(segment, verb):
                 result.error(f"Contains verb-like segment: `{segment}`")
                 break
 

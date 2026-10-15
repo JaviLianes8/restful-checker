@@ -44,7 +44,9 @@ def check_content_type(path: str, methods: dict[str, Any]) -> tuple[list[str], f
                 result.error(f"{method_upper} {path} requestBody does not use application/json")
 
         # Check responses
-        responses = operation.get("responses") or {}
+        responses = operation.get("responses")
+        if not isinstance(responses, dict):
+            continue
         for status_code, response in responses.items():
             content = response.get("content") if isinstance(response, dict) else None
             if content and isinstance(content, dict):

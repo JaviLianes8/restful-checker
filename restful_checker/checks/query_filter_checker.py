@@ -22,7 +22,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
     result = CheckResult("query_filters")
 
     # Skip if it's a single-resource path like /users/{id}
-    if re.search(r"/\{[^}]+}$", path):
+    if re.search(r"/\{[^}]+}/?$", path):
         result.success("Skipped query filter check (single resource)")
         return result.messages, result.finalize_score()
 

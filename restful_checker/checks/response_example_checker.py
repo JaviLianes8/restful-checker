@@ -27,7 +27,9 @@ def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[st
         if not isinstance(operation, dict):
             continue
 
-        responses = operation.get("responses") or {}
+        responses = operation.get("responses")
+        if not isinstance(responses, dict):
+            continue
         for status_code, response in responses.items():
             content = response.get("content") if isinstance(response, dict) else None
             if not content or not isinstance(content, dict):

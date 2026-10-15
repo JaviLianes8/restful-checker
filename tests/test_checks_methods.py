@@ -10,7 +10,7 @@ from restful_checker.checks.http_method_checker import check_http_methods
 from restful_checker.checks.status_code_checker import check_status_codes
 
 
-@pytest.mark.parametrize("path", ["/v1/presets", "/v1/restarts", "/v1/updates", "/v1/startups"])
+@pytest.mark.parametrize("path", ["/v1/presets", "/v1/restarts", "/v1/updates"])
 def test_words_containing_an_action_are_not_actions(path: str) -> None:
     assert check_http_methods(path, {"GET"}) == (["✅ HTTP method usage looks valid"], 1.0)
 

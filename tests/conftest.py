@@ -58,6 +58,17 @@ def all_messages(report: dict[str, Any], category: str | None = None) -> list[di
     return found
 
 
+class FakeResponse:
+    """What resolve_openapi_path reads from a `requests` response."""
+
+    def __init__(self, body: bytes, content_type: str = "") -> None:
+        self.content = body
+        self.headers = {"content-type": content_type} if content_type else {}
+
+    def raise_for_status(self) -> None:
+        pass
+
+
 def problems(messages: list[str]) -> list[str]:
     """Messages of a checker that are errors or warnings."""
     return [m for m in messages if m.startswith(("❌", "⚠️"))]

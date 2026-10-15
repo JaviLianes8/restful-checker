@@ -119,9 +119,12 @@ def test_responses_object_given_as_reference() -> None:
     assert normalize_paths(doc)["/a"]["get"]["responses"] == {"204": {}}
 
 
-def test_content_that_is_not_a_map_is_kept() -> None:
+def test_malformed_content_and_responses_read_as_empty() -> None:
     doc = {"paths": {"/a": {"get": {"responses": {"200": {"content": "text"}}}}}}
-    assert normalize_paths(doc)["/a"]["get"]["responses"]["200"] == {"content": "text"}
+    assert normalize_paths(doc)["/a"]["get"]["responses"]["200"] == {"content": {}}
+    for bad in (["200"], "x", None):
+        bad_doc: dict[str, Any] = {"paths": {"/a": {"get": {"responses": bad}}}}
+        assert normalize_paths(bad_doc)["/a"]["get"]["responses"] == {}
 
 
 def test_media_type_given_as_reference_and_without_schema() -> None:
@@ -157,7 +160,17 @@ def test_pointer_unescapes_tilde_one_before_tilde_zero() -> None:
 
 
 def test_operation_keys_in_capitals_are_still_read() -> None:
-    assert list(normalize_paths({"paths": {"/a": {"GET": {}}}})["/a"]) == ["GET"]
+    assert list(normalize_paths({"paths": {"/a": {"GET": {}}}})["/a"]) == ["get"]
+
+
+def test_case_variants_count_once_and_the_exact_field_wins() -> None:
+    item = {"GET": {"summary": "upper"}, "get": {"summary": "lower"}}
+    assert normalize_paths({"paths": {"/a": item}})["/a"] == {"get": {"summary": "lower"}}
+    item = {"get": {"summary": "lower"}, "GET": {"summary": "upper"}}
+    assert normalize_paths({"paths": {"/a": item}})["/a"] == {"get": {"summary": "lower"}}
+    extra: dict[str, Any] = {"POST": {"summary": "x"}, "Copy": {}}
+    item = {"post": {}, "additionalOperations": extra}
+    assert normalize_paths({"paths": {"/a": item}})["/a"] == {"post": {}, "Copy": {}}
 
 
 def test_json_pointer_escapes_and_arrays() -> None:

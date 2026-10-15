@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 import requests
-from conftest import document, write_json
+from conftest import FakeResponse, document, write_json
 
 from restful_checker import main as cli
 from restful_checker.tools.help_restful_checker import show_help
@@ -84,14 +84,6 @@ def test_analysis_errors_return_one(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert cli.run_checker(args(spec, tmp_path)) == 1
 
 
-class FakeResponse:
-    def __init__(self, body: bytes) -> None:
-        self.content = body
-
-    def raise_for_status(self) -> None:
-        pass
-
-
 def serve(monkeypatch: pytest.MonkeyPatch, body: bytes) -> list[str]:
     seen: list[str] = []
 
@@ -99,7 +91,7 @@ def serve(monkeypatch: pytest.MonkeyPatch, body: bytes) -> list[str]:
         seen.append(url)
         return FakeResponse(body)
 
-    monkeypatch.setattr("restful_checker.main.requests.get", fake_get)
+    monkeypatch.setattr("restful_checker.cli_io.requests.get", fake_get)
     return seen
 
 
@@ -164,7 +156,7 @@ def test_remote_failure_exits(monkeypatch: pytest.MonkeyPatch) -> None:
     def failing(url: str, timeout: float) -> Any:
         raise requests.ConnectionError("down")
 
-    monkeypatch.setattr("restful_checker.main.requests.get", failing)
+    monkeypatch.setattr("restful_checker.cli_io.requests.get", failing)
     with pytest.raises(SystemExit) as exit_info:
         cli.resolve_openapi_path("http://a.example/openapi.json")
     assert exit_info.value.code == 1

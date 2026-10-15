@@ -60,9 +60,9 @@ def _merge_parameters(shared: list[Any], own: list[Any]) -> list[Any]:
     return [param for param in shared if key(param) not in own_keys] + own
 
 
-def _media(content: Any, root: Any) -> Any:
+def _media(content: Any, root: Any) -> dict[Any, Any]:
     if not isinstance(content, dict):
-        return content
+        return {}  # malformed content reads as no content
     result: dict[Any, Any] = {}
     for media_type, media in content.items():
         media = resolve(media, root)
@@ -91,17 +91,25 @@ def _operation(operation: dict[str, Any], shared: list[Any], root: Any) -> dict[
         result["responses"] = {
             str(code): _with_content(response, root) for code, response in responses.items()
         }
+    elif "responses" in operation:
+        result["responses"] = {}  # malformed responses read as none declared
     return result
 
 
 def _operations(item: dict[str, Any], root: Any) -> dict[str, dict[str, Any]]:
     shared = _parameters(item.get("parameters"), root)
-    found: dict[str, Any] = {
-        name: value for name, value in item.items() if str(name).lower() in OPERATION_KEYS
-    }
+    found: dict[str, Any] = {}
+    for name, value in item.items():
+        # Field names are case-sensitive; `GET` is read as `get` for tolerance, and the
+        # exact lower-case field wins when both are present.
+        method = str(name).lower()
+        if method in OPERATION_KEYS and (method not in found or name == method):
+            found[method] = value
     extra = item.get("additionalOperations")
     if isinstance(extra, dict):
-        found.update({str(name): value for name, value in extra.items() if name not in found})
+        for name, value in extra.items():
+            if str(name).lower() not in found:  # may not repeat a fixed field (`POST`)
+                found[str(name)] = value
     result: dict[str, dict[str, Any]] = {}
     for name, value in found.items():
         operation = resolve(value, root)
