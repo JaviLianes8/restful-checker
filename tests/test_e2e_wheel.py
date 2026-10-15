@@ -88,7 +88,8 @@ def test_installed_wheel(dist: Path, tmp_path: Path) -> None:
     out = run(scripts / "restful-checker", spec, "--output-format", "both", "-q", cwd=work)
     assert out == ""
     report = json.loads((work / "html" / "rest_report.json").read_text(encoding="utf-8"))
-    assert [s.get("httpMethods") for s in report["sections"][:2]] == [["POST"], ["GET"]]
+    methods = {s.get("path"): s.get("httpMethods") for s in report["sections"]}
+    assert (methods["/v1/users"], methods["/v1/files"]) == (["GET"], ["POST"])
     run(python, "-m", "restful_checker", spec, "--output-folder", "o", "-q", cwd=work)
     assert (work / "o" / "rest_report.html").is_file()
     code = "import sys, restful_checker as r; print(r.__version__, 'bs4' in sys.modules)"
