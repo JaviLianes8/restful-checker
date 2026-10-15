@@ -112,3 +112,8 @@ def test_cli_options_are_unchanged() -> None:
 
 def test_console_script_entry_point() -> None:
     assert 'restful-checker = "restful_checker.main:main"' in PYPROJECT
+
+
+def test_changelog_has_a_dated_section_for_this_version() -> None:
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert f"## [{restful_checker.__version__}] - 2026-10-15" in changelog

@@ -30,3 +30,16 @@ def test_option_table_lists_every_option() -> None:
     parser_options = {"--output-format", "--output-folder", "--open", "-q", "--version"}
     assert documented == parser_options
     assert "| `--output-folder` | Destination folder | `./html` |" in README
+
+
+def test_check_example_prints_what_it_says() -> None:
+    blocks = re.findall(r"```python\n(.*?)```", README, re.S)
+    code, expected = blocks[1].rsplit("# ", 1)
+    namespace: dict[str, object] = {}
+    exec(code.replace("print(", "result = ("), namespace)
+    assert repr(namespace["result"]) == expected.strip()
+
+
+def test_links_are_absolute() -> None:
+    for target in re.findall(r"\]\(([^)]+)\)", README):
+        assert target.startswith(("https://", "#")), target
