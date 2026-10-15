@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from html import escape
 from pathlib import Path
+from typing import Any, Callable, List, Tuple
 
 from restful_checker.checks.check_error_format import check_error_format
 from restful_checker.checks.pagination_checker import check_pagination
 from restful_checker.checks.response_example_checker import check_response_examples
+from restful_checker.engine.normalizer import normalize_paths
 from restful_checker.engine.openapi_loader import load_openapi
 from restful_checker.engine.path_grouper import group_paths
 from restful_checker.checks.version_checker import check_versioning
@@ -17,8 +22,24 @@ from restful_checker.checks.content_type_checker import check_content_type
 from restful_checker.checks.resource_nesting_checker import check_resource_nesting
 from restful_checker.report.extract_json_from_html import extract_json_from_html
 
+CheckOutput = Tuple[List[str], float]  # a runtime alias: subscripted builtins need 3.9
 
-def analyze_api(path, output_dir="html", output_format="html"):
+
+def _per_path(
+    check: Callable[[str, dict[str, Any]], CheckOutput],
+    raw_paths: set[str],
+    paths: dict[str, dict[str, Any]],
+) -> CheckOutput:
+    # Each real route of a group is checked against its own operations; the group's
+    # normalised name (`{id}`, no trailing slash) is not a key of the Paths Object.
+    runs = [check(raw, paths.get(raw, {})) for raw in sorted(raw_paths)]
+    messages = [message for run_messages, _ in runs for message in run_messages]
+    return messages, sum(score for _, score in runs) / len(runs)
+
+
+def analyze_api(
+    path: str | Path, output_dir: str | Path = "html", output_format: str = "html"
+) -> dict[str, Any]:
     """
     Analyze an OpenAPI specification for RESTful compliance and generate a report.
 
@@ -30,28 +51,32 @@ def analyze_api(path, output_dir="html", output_format="html"):
     Returns:
         dict: Contains:
             - 'html_path': Path to the generated HTML report.
+            - 'json_path': Path to the JSON report written next to it.
             - 'json_report': Parsed JSON report extracted from the HTML.
     """
     # Load and parse the OpenAPI spec
     data = load_openapi(path)
-    paths = data.get("paths", {})
+    if not isinstance(data, dict):
+        raise ValueError(f"{path} does not hold an OpenAPI document")
+    paths = normalize_paths(data)
     resources = group_paths(paths)
 
-    report = []
-    score_sum = 0
+    report: list[dict[str, Any]] = []
+    score_sum = 0.0
     total_blocks = 0
 
     # Analyze each grouped resource
     for base_path, info in resources.items():
         items = [
-            f"<strong>Routes:</strong> {', '.join(sorted(info['raw']))}",
-            f"<strong>HTTP methods:</strong> {', '.join(sorted(info['collection'].union(info['item'])) or ['none'])}"
+            f"<strong>Routes:</strong> {escape(', '.join(sorted(info['raw'])))}",
+            f"<strong>HTTP methods:</strong> "
+            f"{escape(', '.join(sorted(info['collection'].union(info['item'])) or ['none']))}",
         ]
 
         block_score = 0.0
         section_count = 0
 
-        def process_section(title, messages, score):
+        def process_section(title: str, messages: list[str], score: float) -> None:
             nonlocal block_score, section_count
             block_score += score
             section_count += 1
@@ -62,13 +87,13 @@ def analyze_api(path, output_dir="html", output_format="html"):
         process_section("Versioning", *check_versioning(base_path))
         process_section("Naming", *check_naming(base_path))
         process_section("HTTP Methods", *check_http_methods(base_path, info['collection'].union(info['item'])))
-        process_section("Status Codes", *check_status_codes(base_path, paths.get(base_path, {})))
-        process_section("Content Types", *check_content_type(base_path, paths.get(base_path, {})))
-        process_section("Response Examples", *check_response_examples(base_path, paths.get(base_path, {})))
-        process_section("Error Format", *check_error_format(base_path, paths.get(base_path, {})))
+        process_section("Status Codes", *_per_path(check_status_codes, info["raw"], paths))
+        process_section("Content Types", *_per_path(check_content_type, info["raw"], paths))
+        process_section("Response Examples", *_per_path(check_response_examples, info["raw"], paths))
+        process_section("Error Format", *_per_path(check_error_format, info["raw"], paths))
 
         # Analyze each raw path (used for GETs, filters, nesting, etc.)
-        for raw_path in info['raw']:
+        for raw_path in sorted(info["raw"]):
             path_obj = paths.get(raw_path, {})
             if "get" in path_obj and not raw_path.endswith("}"):
                 process_section("Filters", *check_query_filters(raw_path, path_obj))
@@ -113,5 +138,6 @@ def analyze_api(path, output_dir="html", output_format="html"):
 
     return {
         "html_path": str(html_path),
-        "json_report": extract_json_from_html(html_path)
+        "json_path": str(Path(html_path).with_suffix(".json")),
+        "json_report": extract_json_from_html(html_path),
     }

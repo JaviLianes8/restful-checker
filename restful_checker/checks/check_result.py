@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from restful_checker.report.rest_docs import linkify
 
 class CheckResult:
@@ -6,7 +8,7 @@ class CheckResult:
     and computes a final score based on errors and warnings.
     """
 
-    def __init__(self, category: str):
+    def __init__(self, category: str) -> None:
         """
         Initialize the result object for a given check category.
 
@@ -18,7 +20,7 @@ class CheckResult:
         self.score: float = 1.0
         self.has_error: bool = False
 
-    def error(self, msg: str):
+    def error(self, msg: str) -> None:
         """
         Register an error message and force score to zero.
 
@@ -28,7 +30,7 @@ class CheckResult:
         self.messages.append(linkify(f"❌ {msg}", self.category))
         self.has_error = True
 
-    def warning(self, msg: str):
+    def warning(self, msg: str) -> None:
         """
         Register a warning message and reduce score slightly (unless already errored).
 
@@ -39,7 +41,7 @@ class CheckResult:
         if not self.has_error:
             self.score -= 0.2
 
-    def success(self, msg: str):
+    def success(self, msg: str) -> None:
         """
         Register a success message without modifying the score.
 

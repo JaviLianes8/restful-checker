@@ -1,8 +1,12 @@
+from __future__ import annotations
+
+from typing import Any
+
 import re
 from collections import defaultdict
 from restful_checker.checks.check_result import CheckResult
 
-def check_param_consistency(all_paths: dict) -> tuple[list[str], float]:
+def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check for consistent path parameter naming across the OpenAPI spec.
 
@@ -17,8 +21,8 @@ def check_param_consistency(all_paths: dict) -> tuple[list[str], float]:
         tuple[list[str], float]: A list of messages and the computed score.
     """
     result = CheckResult("param_consistency")
-    param_map = defaultdict(set)
-    all_params = set()
+    param_map: defaultdict[str, set[str]] = defaultdict(set)
+    all_params: set[str] = set()
 
     # Extract all path parameters
     for path in all_paths.keys():
@@ -43,7 +47,7 @@ def check_param_consistency(all_paths: dict) -> tuple[list[str], float]:
     # Warn on generic parameter names
     for param in all_params:
         if param.lower() in {"id", "name", "value"}:
-            result.warning(f"Generic parameter name used: `{param}` — consider using more specific names")
+            result.warning(f"Generic parameter name used: `{param}`, consider using more specific names")
 
     if not result.messages:
         result.success("Path parameters look consistent")

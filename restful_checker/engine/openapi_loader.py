@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import json
+from typing import Any
 import yaml
 from pathlib import Path
 
-def load_openapi(path):
+def load_openapi(path: str | Path) -> Any:
     """
     Load an OpenAPI specification from a JSON or YAML file.
 
@@ -19,7 +22,8 @@ def load_openapi(path):
     path = Path(path)
     suffix = path.suffix.lower()
 
-    with open(path, encoding='utf-8') as f:
+    # utf-8-sig: RFC 8259 lets a parser ignore a byte order mark, and editors write one.
+    with open(path, encoding="utf-8-sig") as f:
         if suffix in ('.yaml', '.yml'):
             return yaml.safe_load(f)
         elif suffix == '.json':

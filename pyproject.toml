@@ -1,0 +1,18 @@
+# Package metadata lives in setup.py; this file holds the build backend and tool settings.
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.mypy]
+strict = true
+files = ["restful_checker", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+pytest
+pytest-cov
+ruff
+mypy
+types-PyYAML
+types-requests

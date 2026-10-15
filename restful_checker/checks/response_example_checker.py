@@ -1,6 +1,10 @@
+from __future__ import annotations
+
+from typing import Any
+
 from restful_checker.checks.check_result import CheckResult
 
-def check_response_examples(path: str, methods: dict) -> tuple[list[str], float]:
+def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that each response defines at least one example.
 
@@ -16,26 +20,26 @@ def check_response_examples(path: str, methods: dict) -> tuple[list[str], float]
     """
     result = CheckResult("ResponseExamples")
     evaluated = False
-    seen = set()
+    seen: set[tuple[str, str, str]] = set()
 
     for method_name, operation in methods.items():
         if not isinstance(operation, dict):
             continue
 
-        responses = operation.get("responses", {})
+        responses = operation.get("responses") or {}
         for status_code, response in responses.items():
-            content = response.get("content", {})
-            if not content:
+            content = response.get("content") if isinstance(response, dict) else None
+            if not content or not isinstance(content, dict):
                 continue
 
             evaluated = True
             has_example = any(
-                "example" in media or "examples" in media
+                isinstance(media, dict) and ("example" in media or "examples" in media)
                 for media in content.values()
             )
 
             if not has_example:
-                key = (method_name.upper(), path, status_code)
+                key = (method_name.upper(), path, str(status_code))
                 if key not in seen:
                     seen.add(key)
                     result.warning(

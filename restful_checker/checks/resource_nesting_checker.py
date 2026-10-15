@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import re
 from restful_checker.checks.check_result import CheckResult
 
@@ -10,7 +14,7 @@ class ResourceNestingChecker:
     - Multiple consecutive path parameters (e.g., /{userId}/{postId})
     """
 
-    def __init__(self, path: str, methods: dict):
+    def __init__(self, path: str, methods: dict[str, Any]) -> None:
         self.path = path
         self.methods = methods
         self.result = CheckResult("resource_nesting")
@@ -43,10 +47,10 @@ class ResourceNestingChecker:
                         f"Route '{self.path}' may be missing parent ID in nesting (e.g., /{current}/{{id}}/{next_segment})"
                     )
 
-            # Case: /{userId}/{postId} — potentially unclear structure
+            # Case: /{userId}/{postId}, potentially unclear structure
             if is_current_id and is_next_id:
                 self.result.warning(
-                    f"Route '{self.path}' contains multiple consecutive IDs — ensure nesting is intentional"
+                    f"Route '{self.path}' contains multiple consecutive IDs, ensure nesting is intentional"
                 )
 
         if not self.result.messages:
@@ -55,7 +59,7 @@ class ResourceNestingChecker:
         return self.result.messages, self.result.finalize_score()
 
 
-def check_resource_nesting(path: str, methods: dict) -> tuple[list[str], float]:
+def check_resource_nesting(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Convenience wrapper to call ResourceNestingChecker on a path.
 

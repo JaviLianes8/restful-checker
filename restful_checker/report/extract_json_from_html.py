@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import re
-from bs4 import BeautifulSoup
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
+
+from bs4 import BeautifulSoup, Tag
 
 def classify_message_level_from_emoji(text: str) -> Literal["error", "warn", "info"]:
     """
@@ -21,7 +24,31 @@ def classify_message_level_from_emoji(text: str) -> Literal["error", "warn", "in
         return "info"
     return "info"
 
-def extract_json_from_html(html_path: str | Path) -> dict:
+def _http_methods(section: Tag) -> list[str]:
+    # Read the methods from their own list item; a regex over the whole section text ran
+    # into the next heading and kept its first capital letter.
+    for li in section.find_all("li"):
+        text = li.get_text().strip()
+        if text.startswith("HTTP methods:"):
+            names = text[len("HTTP methods:") :].split(",")
+            return [name.strip() for name in names if name.strip() and name.strip() != "none"]
+    return []
+
+
+def _section_title(h2: Tag) -> tuple[str, int]:
+    full_title = h2.text.strip()
+    span = h2.find("span", class_="score-inline")
+    if isinstance(span, Tag):
+        score_match = re.search(r"\((\d+)%\)", span.text)
+        title = full_title[: len(full_title) - len(span.text.strip())]
+        title = re.sub(r"^[🔴🟡🟢]+\s*", "", title).strip()
+        return title, int(score_match.group(1)) if score_match else 100
+    score_match = re.search(r"\((\d+)%\)", full_title)
+    title = re.sub(r"^[🔴🟡🟢]+\s*", "", full_title)
+    return re.sub(r"\s*\(.*?\)", "", title).strip(), int(score_match.group(1)) if score_match else 100
+
+
+def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
     """
     Parse an HTML report and extract structured JSON data.
 
@@ -34,7 +61,7 @@ def extract_json_from_html(html_path: str | Path) -> dict:
     with open(html_path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
 
-    result = {
+    result: dict[str, Any] = {
         "title": "RESTful API JSON Report",
         "score": None,
         "generated": None,
@@ -65,20 +92,12 @@ def extract_json_from_html(html_path: str | Path) -> dict:
         if not h2:
             continue
 
-        full_title = h2.text.strip()
-        path_clean = re.sub(r"^[🔴🟡🟢]+\s*", "", full_title)
-        score_match = re.search(r"\((\d+)%\)", full_title)
-        section_score = int(score_match.group(1)) if score_match else 100
-        path_clean = re.sub(r"\s*\(.*?\)", "", path_clean).strip()
-
-        # Extract HTTP methods
-        raw_text = section.get_text()
-        http_match = re.search(r"HTTP methods:\s*([A-Z,\s]+)", raw_text)
-        methods = [m.strip() for m in http_match.group(1).split(",")] if http_match else []
+        path_clean, section_score = _section_title(h2)
+        methods = _http_methods(section)
 
         # Parse message items by category
-        items = []
-        current_section = None
+        items: list[dict[str, Any]] = []
+        current_section: dict[str, Any] | None = None
 
         for tag in section.find_all(["h3", "ul"]):
             if tag.name == "h3":
@@ -107,7 +126,7 @@ def extract_json_from_html(html_path: str | Path) -> dict:
             items.append(current_section)
 
         # Section JSON block
-        section_obj = {
+        section_obj: dict[str, Any] = {
             "score": section_score,
             "items": items
         }
