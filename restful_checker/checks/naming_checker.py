@@ -1,3 +1,5 @@
+"""Resource naming of a route."""
+
 from __future__ import annotations
 
 import re
@@ -44,7 +46,7 @@ def check_contains_numbers(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         if VERSION_REGEX.fullmatch(segment):
             continue  # `v1` is the version segment the versioning check asks for
-        if re.search(r"[a-zA-Z]+[0-9]+", segment):
+        if re.search(r"[a-zA-Z][0-9]", segment):
             result.warning(f"Segment `{segment}` contains mixed alphanumeric name")
 
 
@@ -66,6 +68,11 @@ def check_segment_preposition(segments: list[str], result: CheckResult) -> None:
 def check_naming(base_path: str) -> tuple[list[str], float]:
     """
     Check if the base path follows RESTful naming conventions.
+
+    >>> check_naming("/v1/users/{id}")
+    (['✅ Resource naming looks RESTful'], 1.0)
+    >>> check_naming("/v1/get-users")
+    (['❌ Contains verb-like segment: `get-users`'], 0.0)
 
     Args:
         base_path (str): Normalized API base path (e.g., "/users/{id}")

@@ -65,7 +65,7 @@ def check_get_with_side_effect(path: str, method: str, result: CheckResult) -> N
 
 def check_post_on_resource_id(path: str, method: str, result: CheckResult) -> None:
     if method.upper() == "POST":
-        if re.search(r"/\{[^}]+}", path):
+        if re.search(r"/\{[^{}]+}", path):
             result.warning(
                 f"POST used with resource ID in path `{path}`, consider using PUT or PATCH"
             )
@@ -73,7 +73,7 @@ def check_post_on_resource_id(path: str, method: str, result: CheckResult) -> No
 
 def check_delete_without_id(path: str, method: str, result: CheckResult) -> None:
     if method.upper() == "DELETE":
-        if not re.search(r"/\{[^}]+}", path):
+        if not re.search(r"/\{[^{}]+}", path):
             result.warning(
                 f"DELETE without ID in path `{path}`, consider confirming if this is intentional"
             )

@@ -1,3 +1,5 @@
+"""Nesting of resources in a route."""
+
 from __future__ import annotations
 
 import re
@@ -65,6 +67,9 @@ class ResourceNestingChecker:
 def check_resource_nesting(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Convenience wrapper to call ResourceNestingChecker on a path.
+
+    >>> check_resource_nesting("/v1/users/{userId}/orders", {})
+    (['✅ Route nesting appears valid'], 1.0)
 
     Args:
         path (str): API path being analyzed.

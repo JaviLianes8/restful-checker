@@ -70,5 +70,131 @@
     "fetched": "2026-10-15",
     "size": 28360,
     "sha256": "61a5378f4255c720beb2a4b4a63b29540147c140f36988bf086291989b4cd2d7"
+  },
+  "oai-2.0-petstore.yaml": {
+    "title": "OpenAPI example v2.0/yaml/petstore.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v2.0/yaml/petstore.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 2185,
+    "sha256": "9fdb0fc3767861fcd86811901165a930c2c3102edbbcc20e4efb13064bfc44c7"
+  },
+  "oai-2.0-petstore-expanded.yaml": {
+    "title": "OpenAPI example v2.0/yaml/petstore-expanded.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v2.0/yaml/petstore-expanded.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 3454,
+    "sha256": "0cc54991bbc2da80b068a437df2c78c7403684e6421028da4842a26a09d1f220"
+  },
+  "oai-2.0-uber.json": {
+    "title": "OpenAPI example v2.0/json/uber.json",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v2.0/json/uber.json",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 11679,
+    "sha256": "4372f3f6fa7d56f5baade386429f4f9b5e8950ddaf30574b966461300f4480af"
+  },
+  "oai-3.0-petstore.yaml": {
+    "title": "OpenAPI example v3.0/petstore.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.0/petstore.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 2766,
+    "sha256": "cefaafa05eee75b1888762dea08a295f245e9f3e4bdb8777f4bdfed09e335339"
+  },
+  "oai-3.0-petstore-expanded.yaml": {
+    "title": "OpenAPI example v3.0/petstore-expanded.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.0/petstore-expanded.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 5471,
+    "sha256": "abc68d08c674c8f0415aaeeb87c4203d5dd7257cdb79ac7ccb0446d1c5b9a7c2"
+  },
+  "oai-3.0-uspto.yaml": {
+    "title": "OpenAPI example v3.0/uspto.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.0/uspto.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 7737,
+    "sha256": "29d32d0a0710b0acac434807e018ebd9cc192ad604fefdcf51422833b5963642"
+  },
+  "oai-3.0-api-with-examples.yaml": {
+    "title": "OpenAPI example v3.0/api-with-examples.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.0/api-with-examples.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 6907,
+    "sha256": "2b8d39097f8d0800b3d9b94f784348ea6d046a82c2b78e83b737874c938e63b9"
+  },
+  "oai-3.0-link-example.yaml": {
+    "title": "OpenAPI example v3.0/link-example.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.0/link-example.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 5328,
+    "sha256": "92b502f64d80d67e2a8e634e5b82e9b7ae1f1e8fb5b754cc1c2cad1102447206"
+  },
+  "oai-3.1-tictactoe.yaml": {
+    "title": "OpenAPI example v3.1/tictactoe.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.1/tictactoe.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 6753,
+    "sha256": "772a199c00079409660f84ef7746f3f5f6cb3250945732bedd3529ff913d85d3"
+  },
+  "oai-3.1-webhook-example.yaml": {
+    "title": "OpenAPI example v3.1/webhook-example.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.1/webhook-example.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 947,
+    "sha256": "1bf9c928e1d42d5ffd3d793dbc6b569bd47a97a4679ee5c85cd78091136ab2a4"
+  },
+  "oai-3.2-query-example.yaml": {
+    "title": "OpenAPI example v3.2/3.2-query-example.yaml",
+    "url": "https://raw.githubusercontent.com/OAI/learn.openapis.org/82b82f372aa185a07ea11bc158619895ab21f741/examples/v3.2/3.2-query-example.yaml",
+    "revision": "OAI/learn.openapis.org commit 82b82f372aa185a07ea11bc158619895ab21f741",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/OAI/learn.openapis.org/blob/main/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 2969,
+    "sha256": "b303415fb10b1db28d74a35ec584441eba269e62c916b90337841dc0e3525c42"
+  },
+  "github-api.json": {
+    "title": "GitHub REST API description (api.github.com)",
+    "url": "https://raw.githubusercontent.com/github/rest-api-description/a7fb3ea21794469181243b7611b6e7cb99e0cef9/descriptions/api.github.com/api.github.com.json",
+    "revision": "github/rest-api-description commit a7fb3ea21794469181243b7611b6e7cb99e0cef9",
+    "licence": "MIT (https://github.com/github/rest-api-description/blob/main/LICENSE.md)",
+    "fetched": "2026-10-15",
+    "size": 13499183,
+    "sha256": "2d18c7b121c209aa40a5c92ea462af1f7955603fc3ec530ab0466549498d14cf"
+  },
+  "jsonapi-1.1.md": {
+    "title": "JSON:API 1.1 format (pagination)",
+    "url": "https://raw.githubusercontent.com/json-api/json-api/bde79ceb9e27cce77a5b2b3716b851f623bb7b62/_format/1.1/index.md",
+    "revision": "json-api/json-api commit bde79ceb9e27cce77a5b2b3716b851f623bb7b62",
+    "licence": "CC0 1.0 (https://github.com/json-api/json-api/blob/gh-pages/LICENSE)",
+    "fetched": "2026-10-15",
+    "size": 90600,
+    "sha256": "8d590f694fcdd140201d5c9b9cf246596139088eedc35ab89df98aa5b0e07f34"
+  },
+  "aip-185.md": {
+    "title": "Google AIP-185 API versioning",
+    "url": "https://raw.githubusercontent.com/aip-dev/google.aip.dev/615875bffc45584cd9d22cd2799fd4b7d377c85a/aip/general/0185.md",
+    "revision": "aip-dev/google.aip.dev commit 615875bffc45584cd9d22cd2799fd4b7d377c85a",
+    "licence": "Creative Commons Attribution 4.0 (https://github.com/aip-dev/google.aip.dev/blob/master/LICENSE.md)",
+    "fetched": "2026-10-15",
+    "size": 11276,
+    "sha256": "0f4e0455418b80935fa3336cb4607376a5796b1152f174642881821f7e510bf5"
   }
 }

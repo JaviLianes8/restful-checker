@@ -15,6 +15,9 @@ from restful_checker.report.json_report import GLOBAL_SECTIONS, METHODS_LABEL
 
 _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source"}
 _DOTS = r"^[🔴🟡🟢]+\s*"
+# Reports are nested a few levels deep; a page nested far deeper is not one, and reading
+# its nested lists would grow with the square of its size.
+MAX_DEPTH = 64
 
 
 class _Node:
@@ -52,6 +55,8 @@ class _TreeBuilder(HTMLParser):
         node = _Node(tag, classes)
         self.stack[-1].children.append(node)
         if tag not in _VOID:
+            if len(self.stack) > MAX_DEPTH:
+                raise ValueError("the page is nested too deeply to be a report")
             self.stack.append(node)
 
     def handle_endtag(self, tag: str) -> None:
@@ -96,9 +101,21 @@ def _section_title(h2: _Node) -> tuple[str, int]:
         return re.sub(_DOTS, "", title).strip(), int(score_match.group(1)) if score_match else 100
     score_match = re.search(r"\((\d+)%\)", full_title)
     title = re.sub(_DOTS, "", full_title)
-    return re.sub(r"\s*\(.*?\)", "", title).strip(), int(
-        score_match.group(1)
-    ) if score_match else 100
+    return _drop_parentheses(title).strip(), int(score_match.group(1)) if score_match else 100
+
+
+def _drop_parentheses(text: str) -> str:
+    # Removes each `(...)` group and the blanks before it, in one pass.
+    parts: list[str] = []
+    position = 0
+    while True:
+        start = text.find("(", position)
+        end = text.find(")", start) if start >= 0 else -1
+        if end < 0:
+            parts.append(text[position:])
+            return "".join(parts)
+        parts.append(text[position:start].rstrip())
+        position = end + 1
 
 
 def _items(section: _Node) -> list[dict[str, Any]]:
@@ -126,6 +143,9 @@ def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
 
     Returns:
         dict: Structured JSON report including sections, score, and metadata.
+
+    Raises:
+        ValueError: The page is nested more than 64 elements deep.
     """
     builder = _TreeBuilder()
     builder.feed(Path(html_path).read_text(encoding="utf-8"))

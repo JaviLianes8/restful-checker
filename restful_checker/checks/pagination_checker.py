@@ -53,7 +53,7 @@ def check_pagination(path: str, methods: dict[str, Any]) -> tuple[list[str], flo
     evaluated = False
 
     # A single resource such as /users/{id} is not a collection: nothing to page through.
-    if re.search(r"/\{[^}]+}/?$", path):
+    if re.search(r"/\{[^{}]+}/?$", path):
         result.success("Skipped pagination check (single resource)")
         return result.messages, result.finalize_score()
 

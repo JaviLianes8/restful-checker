@@ -27,7 +27,9 @@ KEBAB_NOUN_PREFIXES = ("post-",)
 def words(path: str) -> list[str]:
     """Lower-case words of a route: `/users/deleteUser` gives users, delete, user."""
     spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", path)
-    spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)  # `HTTPReset`
+    # `HTTPReset`: a space before the last capital of a run followed by a lower-case letter
+    # (lookarounds keep it linear on a long run of capitals).
+    spaced = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", spaced)
     return [word.lower() for word in re.split(r"[^A-Za-z0-9]+", spaced) if word]
 
 

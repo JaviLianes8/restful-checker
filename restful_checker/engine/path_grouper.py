@@ -29,7 +29,7 @@ def group_paths(paths: dict[str, Any]) -> defaultdict[str, dict[str, set[str]]]:
     for path, methods in paths.items():
         raw = path
         # Normalize path by replacing all {param} with {id}
-        base = re.sub(r"\{[^}]+}", "{id}", path).rstrip("/")
+        base = re.sub(r"\{[^{}]+}", "{id}", path).rstrip("/")
         is_item = "{" in path
 
         for method in methods:

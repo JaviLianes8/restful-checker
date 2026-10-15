@@ -69,7 +69,7 @@ def _analyze_group(
     # Analyze each raw path (used for GETs, filters, nesting, etc.)
     for raw_path in sorted(raw):
         path_obj = paths.get(raw_path, {})
-        if "get" in path_obj and not re.search(r"/\{[^}]+}/?$", raw_path):
+        if "get" in path_obj and not re.search(r"/\{[^{}]+}/?$", raw_path):
             process_section("Filters", check_query_filters(raw_path, path_obj))
         process_section("Pagination", check_pagination(raw_path, path_obj))
         process_section("Resource Nesting", check_resource_nesting(raw_path, path_obj))

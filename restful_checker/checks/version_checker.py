@@ -8,7 +8,7 @@ from restful_checker.checks.check_result import CheckResult
 
 # `v1`, `v2.1`, and the pre-release forms `v1beta1`, `v2alpha` (as Kubernetes and Google use).
 VERSION_REGEX = re.compile(r"^v[0-9]+(\.[0-9]+)*((alpha|beta)[0-9]*)?$", re.IGNORECASE)
-PARAM_REGEX = re.compile(r"\{[^}]+}")
+PARAM_REGEX = re.compile(r"\{[^{}]+}")
 
 # === Individual Checks ===
 

@@ -1,3 +1,5 @@
+"""Query filters of collection GET operations."""
+
 from __future__ import annotations
 
 import re
@@ -12,6 +14,10 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
 
     Skips paths that point to a single resource (ending in /{id}).
 
+    >>> get = {"get": {"parameters": [{"name": "status", "in": "query", "type": "string"}]}}
+    >>> check_query_filters("/v1/users", get)
+    (['✅ Collection endpoints support query filters'], 1.0)
+
     Args:
         path (str): The API path to check.
         methods (dict): OpenAPI method definitions for that path.
@@ -22,7 +28,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
     result = CheckResult("query_filters")
 
     # Skip if it's a single-resource path like /users/{id}
-    if re.search(r"/\{[^}]+}/?$", path):
+    if re.search(r"/\{[^{}]+}/?$", path):
         result.success("Skipped query filter check (single resource)")
         return result.messages, result.finalize_score()
 
