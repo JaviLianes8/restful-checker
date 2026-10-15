@@ -69,20 +69,27 @@ def generate_html(
         '<div class="container">',
         "<h1>RESTful API Report</h1>",
         f"<p><strong>Generated:</strong> {now}</p>",
-        f"<div class='section'><div class='score' style='background:{color}'>{score}% - {level}</div></div>"
+        f"<div class='section'><div class='score' style='background:{color}'>{score}% - "
+        f"{level}</div></div>",
     ]
 
     for block in report:
         block_score = block.get("score", 1.0)
         emoji, level_class = (
-            ("🔴", "section-error") if block_score < 0.5 else
-            ("🟡", "section-warn") if block_score < 0.7 else
-            ("🟢", "section-ok")
+            ("🔴", "section-error")
+            if block_score < 0.5
+            else ("🟡", "section-warn")
+            if block_score < 0.7
+            else ("🟢", "section-ok")
         )
 
-        html_parts.append(f"<div class='section {level_class}'><h2>{emoji}&nbsp;{html_lib.escape(str(block['title']))} <span class='score-inline'>({round(block_score * 100)}%)</span></h2>")
+        title = html_lib.escape(str(block["title"]))
+        html_parts.append(
+            f"<div class='section {level_class}'><h2>{emoji}&nbsp;{title} "
+            f"<span class='score-inline'>({round(block_score * 100)}%)</span></h2>"
+        )
 
-        section_messages = []
+        section_messages: list[str] = []
         for item in block["items"]:
             if item.startswith("### "):
                 if section_messages:
@@ -107,6 +114,8 @@ def generate_html(
     # Optional: generate matching .json file
     if write_json:
         json_output = output.with_suffix(".json")
-        json_output.write_text(json.dumps(extract_json_from_html(output), indent=2), encoding="utf-8")
+        json_output.write_text(
+            json.dumps(extract_json_from_html(output), indent=2), encoding="utf-8"
+        )
 
     return str(output)

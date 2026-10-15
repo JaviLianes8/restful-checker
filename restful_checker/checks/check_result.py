@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from restful_checker.report.rest_docs import linkify
 
+
 class CheckResult:
     """
     Collects and formats result messages for a single check category,

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
-import re
-
 from restful_checker.checks.check_result import CheckResult
+
 
 def check_pagination(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
@@ -33,9 +33,7 @@ def check_pagination(path: str, methods: dict[str, Any]) -> tuple[list[str], flo
 
         evaluated = True
         parameters = operation.get("parameters") or []
-        param_names = {
-            p.get("name", "") for p in parameters if isinstance(p, dict)
-        }
+        param_names = {p.get("name", "") for p in parameters if isinstance(p, dict)}
 
         if not {"page", "limit"} & param_names:
             result.warning(

@@ -4,6 +4,7 @@ from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
 
+
 def check_https_usage(openapi_data: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that all server URLs in the OpenAPI spec use HTTPS.

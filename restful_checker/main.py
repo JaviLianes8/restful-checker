@@ -43,10 +43,10 @@ def print_error(msg: str) -> None:
 def is_valid_file(path: str) -> bool:
     """
     Check if a path points to a valid OpenAPI file with .json, .yaml, or .yml extension.
-    
+
     Args:
         path (str): Path to check.
-    
+
     Returns:
         bool: True if the path is a valid file with a correct extension.
     """
@@ -56,10 +56,10 @@ def is_valid_file(path: str) -> bool:
 def is_valid_openapi(path: str) -> bool:
     """
     Validate if the file at the given path is a valid OpenAPI or Swagger document.
-    
+
     Args:
         path (str): Path to the OpenAPI file.
-    
+
     Returns:
         bool: True if the file contains a valid OpenAPI or Swagger root key.
     """
@@ -96,10 +96,10 @@ def resolve_openapi_path(path: str) -> str:
     """
     Resolve a given path to a valid local file.
     If the path is a URL, downloads the content to a temporary file.
-    
+
     Args:
         path (str): URL or local path to the OpenAPI definition.
-    
+
     Returns:
         str: Path to the resolved local file (original or temporary).
     """
@@ -121,7 +121,9 @@ def resolve_openapi_path(path: str) -> str:
     elif is_valid_file(path):
         return path
     else:
-        print_error(f"Invalid file: '{path}'\n👉 Must be a local .json/.yaml/.yml file or a valid URL")
+        print_error(
+            f"Invalid file: '{path}'\n👉 Must be a local .json/.yaml/.yml file or a valid URL"
+        )
         sys.exit(1)
 
 
@@ -137,24 +139,33 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("path", nargs="?", help="Path or URL to OpenAPI file (.json, .yaml, .yml)")
-    parser.add_argument("--output-format", choices=["html", "json", "both"], default="html",
-                        help="Output format: html, json, or both (default: html)")
-    parser.add_argument("--output-folder", default="html",
-                        help="Destination folder for output reports (default: ./html)")
-    parser.add_argument("--open", action="store_true",
-                        help="Open the generated HTML report in the default browser")
-    parser.add_argument("-q", "--quiet", action="store_true",
-                        help="Suppress all output except errors")
+    parser.add_argument(
+        "--output-format",
+        choices=["html", "json", "both"],
+        default="html",
+        help="Output format: html, json, or both (default: html)",
+    )
+    parser.add_argument(
+        "--output-folder",
+        default="html",
+        help="Destination folder for output reports (default: ./html)",
+    )
+    parser.add_argument(
+        "--open", action="store_true", help="Open the generated HTML report in the default browser"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress all output except errors"
+    )
     return parser.parse_args()
 
 
 def run_checker(args: argparse.Namespace) -> int:
     """
     Main execution function that handles file validation, parsing, and analysis.
-    
+
     Args:
         args (argparse.Namespace): Parsed CLI arguments.
-    
+
     Returns:
         int: Exit code (0 for success, 1 for error).
     """
@@ -180,7 +191,7 @@ def _check(args: Any, path: str) -> int:
 
     try:
         result = analyze_api(path, output_dir=args.output_folder)
-        html_path = os.path.abspath(result['html_path'])
+        html_path = os.path.abspath(result["html_path"])
 
         if args.output_format in ["html", "both"]:
             if not args.quiet:

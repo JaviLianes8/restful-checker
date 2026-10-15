@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
-from typing import Any
-import yaml
 from pathlib import Path
+from typing import Any
+
+import yaml
+
 
 def load_openapi(path: str | Path) -> Any:
     """
@@ -24,9 +26,9 @@ def load_openapi(path: str | Path) -> Any:
 
     # utf-8-sig: RFC 8259 lets a parser ignore a byte order mark, and editors write one.
     with open(path, encoding="utf-8-sig") as f:
-        if suffix in ('.yaml', '.yml'):
+        if suffix in (".yaml", ".yml"):
             return yaml.safe_load(f)
-        elif suffix == '.json':
+        elif suffix == ".json":
             return json.load(f)
         else:
             raise ValueError(f"Unsupported file extension: {suffix}")

@@ -4,6 +4,7 @@ from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
 
+
 def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that each response defines at least one example.
@@ -43,7 +44,8 @@ def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[st
                 if key not in seen:
                     seen.add(key)
                     result.warning(
-                        f"{method_name.upper()} {path} response {status_code} is missing example or examples"
+                        f"{method_name.upper()} {path} response {status_code} is missing example "
+                        "or examples"
                     )
 
     if not evaluated:

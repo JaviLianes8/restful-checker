@@ -6,6 +6,7 @@ from typing import Any, Literal
 
 from bs4 import BeautifulSoup, Tag
 
+
 def classify_message_level_from_emoji(text: str) -> Literal["error", "warn", "info"]:
     """
     Determine the message level based on its emoji.
@@ -23,6 +24,7 @@ def classify_message_level_from_emoji(text: str) -> Literal["error", "warn", "in
     elif "✅" in text:
         return "info"
     return "info"
+
 
 def _http_methods(section: Tag) -> list[str]:
     # Read the methods from their own list item; a regex over the whole section text ran
@@ -45,7 +47,9 @@ def _section_title(h2: Tag) -> tuple[str, int]:
         return title, int(score_match.group(1)) if score_match else 100
     score_match = re.search(r"\((\d+)%\)", full_title)
     title = re.sub(r"^[🔴🟡🟢]+\s*", "", full_title)
-    return re.sub(r"\s*\(.*?\)", "", title).strip(), int(score_match.group(1)) if score_match else 100
+    return re.sub(r"\s*\(.*?\)", "", title).strip(), int(
+        score_match.group(1)
+    ) if score_match else 100
 
 
 def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
@@ -58,14 +62,14 @@ def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
     Returns:
         dict: Structured JSON report including sections, score, and metadata.
     """
-    with open(html_path, "r", encoding="utf-8") as f:
+    with open(html_path, encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
 
     result: dict[str, Any] = {
         "title": "RESTful API JSON Report",
         "score": None,
         "generated": None,
-        "sections": []
+        "sections": [],
     }
 
     # Extract title
@@ -103,10 +107,7 @@ def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
             if tag.name == "h3":
                 if current_section:
                     items.append(current_section)
-                current_section = {
-                    "category": tag.text.strip(),
-                    "messages": []
-                }
+                current_section = {"category": tag.text.strip(), "messages": []}
             elif tag.name == "ul" and current_section:
                 for li in tag.find_all("li"):
                     raw_msg = li.text.strip()
@@ -117,19 +118,15 @@ def extract_json_from_html(html_path: str | Path) -> dict[str, Any]:
                         .replace("More info", "")
                         .strip()
                     )
-                    current_section["messages"].append({
-                        "message": clean_msg,
-                        "level": classify_message_level_from_emoji(raw_msg)
-                    })
+                    current_section["messages"].append(
+                        {"message": clean_msg, "level": classify_message_level_from_emoji(raw_msg)}
+                    )
 
         if current_section:
             items.append(current_section)
 
         # Section JSON block
-        section_obj: dict[str, Any] = {
-            "score": section_score,
-            "items": items
-        }
+        section_obj: dict[str, Any] = {"score": section_score, "items": items}
 
         if path_clean in ["SSL", "Global Parameter Consistency"]:
             section_obj["section"] = path_clean

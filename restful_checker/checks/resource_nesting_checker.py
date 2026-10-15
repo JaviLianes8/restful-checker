@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
-import re
 from restful_checker.checks.check_result import CheckResult
+
 
 class ResourceNestingChecker:
     """
@@ -44,13 +45,15 @@ class ResourceNestingChecker:
             if not is_current_id and not next_segment.startswith("{"):
                 if current.endswith("s") and next_segment.endswith("s"):
                     self.result.error(
-                        f"Route '{self.path}' may be missing parent ID in nesting (e.g., /{current}/{{id}}/{next_segment})"
+                        f"Route '{self.path}' may be missing parent ID in nesting (e.g., "
+                        f"/{current}/{{id}}/{next_segment})"
                     )
 
             # Case: /{userId}/{postId}, potentially unclear structure
             if is_current_id and is_next_id:
                 self.result.warning(
-                    f"Route '{self.path}' contains multiple consecutive IDs, ensure nesting is intentional"
+                    f"Route '{self.path}' contains multiple consecutive IDs, ensure nesting is "
+                    "intentional"
                 )
 
         if not self.result.messages:

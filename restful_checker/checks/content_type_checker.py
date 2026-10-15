@@ -4,6 +4,7 @@ from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
 
+
 def is_json_media_type(media_type: object) -> bool:
     """Tell whether a media type is JSON: application/json, with or without parameters,
     or any type with the +json structured syntax suffix (RFC 6839), such as
@@ -49,7 +50,10 @@ def check_content_type(path: str, methods: dict[str, Any]) -> tuple[list[str], f
             if content and isinstance(content, dict):
                 evaluated = True
                 if not any(is_json_media_type(media) for media in content):
-                    result.error(f"{method_upper} {path} response {status_code} does not use application/json")
+                    result.error(
+                        f"{method_upper} {path} response {status_code} does not use "
+                        "application/json"
+                    )
 
     if evaluated and not result.messages:
         result.success("All request and response bodies use application/json")

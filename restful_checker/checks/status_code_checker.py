@@ -15,42 +15,67 @@ EXPECTED_CODES = {
 
 # === Individual Checks ===
 
-def check_missing_responses(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_missing_responses(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     if not responses:
         result.error(f"No status codes defined for {method} {path}")
+
 
 def check_default_used(method: str, path: str, responses: set[str], result: CheckResult) -> None:
     if "default" in responses:
         result.warning(f"Default response used in {method} {path}, be explicit")
 
-def check_missing_expected_codes(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_missing_expected_codes(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     expected = EXPECTED_CODES.get(method, set())
     missing = expected - responses
     if missing:
-        result.warning(f"{method} {path} is missing expected status codes: {', '.join(sorted(missing))}")
+        result.warning(
+            f"{method} {path} is missing expected status codes: {', '.join(sorted(missing))}"
+        )
 
-def check_post_status_semantics(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_post_status_semantics(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     if method == "POST":
         if "200" in responses and "201" not in responses:
             result.error(f"POST {path} returns 200, should return 201 for creation")
         if "204" in responses:
             result.warning(f"POST {path} includes 204, consider using 201 instead")
 
-def check_delete_status_semantics(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_delete_status_semantics(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     if method == "DELETE" and "200" in responses and "204" not in responses:
         result.error(f"DELETE {path} returns 200, should return 204 if successful")
 
-def check_patch_put_semantics(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_patch_put_semantics(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     if method in {"PUT", "PATCH"}:
         if not {"200", "204"} & responses:
             result.warning(f"{method} {path} missing 200 or 204, consider returning success code")
 
-def check_manual_5xx_usage(method: str, path: str, responses: set[str], result: CheckResult) -> None:
+
+def check_manual_5xx_usage(
+    method: str, path: str, responses: set[str], result: CheckResult
+) -> None:
     for code in responses:
         if code.startswith("5"):
-            result.warning(f"{method} {path} defines {code} manually, server errors should be implicit")
+            result.warning(
+                f"{method} {path} defines {code} manually, server errors should be implicit"
+            )
+
 
 # === Main Function ===
+
 
 def check_status_codes(path: str, method_map: dict[str, Any]) -> tuple[list[str], float]:
     """

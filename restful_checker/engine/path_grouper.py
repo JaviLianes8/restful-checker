@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
-from typing import Any
 from collections import defaultdict
+from typing import Any
+
 
 def group_paths(paths: dict[str, Any]) -> defaultdict[str, dict[str, set[str]]]:
     """
@@ -21,11 +22,9 @@ def group_paths(paths: dict[str, Any]) -> defaultdict[str, dict[str, set[str]]]:
             - 'item': set of HTTP methods for item endpoints
             - 'raw': original raw paths
     """
-    resources: defaultdict[str, dict[str, set[str]]] = defaultdict(lambda: {
-        "collection": set(),
-        "item": set(),
-        "raw": set()
-    })
+    resources: defaultdict[str, dict[str, set[str]]] = defaultdict(
+        lambda: {"collection": set(), "item": set(), "raw": set()}
+    )
 
     for path, methods in paths.items():
         raw = path

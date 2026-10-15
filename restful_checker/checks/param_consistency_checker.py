@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
-
 import re
 from collections import defaultdict
+from typing import Any
+
 from restful_checker.checks.check_result import CheckResult
+
 
 def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float]:
     """
@@ -47,7 +48,9 @@ def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float
     # Warn on generic parameter names
     for param in all_params:
         if param.lower() in {"id", "name", "value"}:
-            result.warning(f"Generic parameter name used: `{param}`, consider using more specific names")
+            result.warning(
+                f"Generic parameter name used: `{param}`, consider using more specific names"
+            )
 
     if not result.messages:
         result.success("Path parameters look consistent")

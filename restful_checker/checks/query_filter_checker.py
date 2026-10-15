@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
-import re
 from restful_checker.checks.check_result import CheckResult
+
 
 def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
@@ -35,17 +36,17 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
 
     if not query_params:
         result.warning(
-            f"GET collection endpoint `{path}` has no query filters, consider supporting `?filter=` or `?status=`"
+            f"GET collection endpoint `{path}` has no query filters, consider supporting "
+            "`?filter=` or `?status=`"
         )
     else:
         useful_names = {"filter", "status", "type", "sort", "limit"}
-        has_meaningful = any(
-            str(p.get("name", "")).lower() in useful_names for p in query_params
-        )
+        has_meaningful = any(str(p.get("name", "")).lower() in useful_names for p in query_params)
 
         if not has_meaningful:
             result.warning(
-                f"GET {path} has query params but none look like useful filters (e.g., `filter`, `status`)"
+                f"GET {path} has query params but none look like useful filters (e.g., `filter`, "
+                "`status`)"
             )
 
         for param in query_params:
@@ -56,7 +57,9 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
             param_type = param_type or param.get("type")
 
             if param_type == "object":
-                result.warning(f"Query parameter `{name}` has type `object`, consider using primitives")
+                result.warning(
+                    f"Query parameter `{name}` has type `object`, consider using primitives"
+                )
             elif not param_type:
                 result.warning(f"Query parameter `{name}` has no defined type")
 

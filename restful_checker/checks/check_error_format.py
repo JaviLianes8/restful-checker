@@ -4,6 +4,7 @@ from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
 
+
 def check_error_format(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that 4xx/5xx responses use a structured error format
@@ -37,14 +38,16 @@ def check_error_format(path: str, methods: dict[str, Any]) -> tuple[list[str], f
                         schema.get("properties"), dict
                     ):
                         result.warning(
-                            f"{method_name.upper()} {path} error {status_code} has no structured schema"
+                            f"{method_name.upper()} {path} error {status_code} has no structured "
+                            "schema"
                         )
                     else:
                         properties = schema["properties"]
                         required_keys = ("code", "message")
                         if not all(key in properties for key in required_keys):
                             result.warning(
-                                f"{method_name.upper()} {path} error {status_code} should include 'code' and 'message' fields"
+                                f"{method_name.upper()} {path} error {status_code} should include "
+                                "'code' and 'message' fields"
                             )
 
     if evaluated and not result.messages:

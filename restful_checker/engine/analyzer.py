@@ -5,22 +5,22 @@ from pathlib import Path
 from typing import Any, Callable, List, Tuple
 
 from restful_checker.checks.check_error_format import check_error_format
+from restful_checker.checks.content_type_checker import check_content_type
+from restful_checker.checks.http_method_checker import check_http_methods
+from restful_checker.checks.https_checker import check_https_usage
+from restful_checker.checks.naming_checker import check_naming
 from restful_checker.checks.pagination_checker import check_pagination
+from restful_checker.checks.param_consistency_checker import check_param_consistency
+from restful_checker.checks.query_filter_checker import check_query_filters
+from restful_checker.checks.resource_nesting_checker import check_resource_nesting
 from restful_checker.checks.response_example_checker import check_response_examples
+from restful_checker.checks.status_code_checker import check_status_codes
+from restful_checker.checks.version_checker import check_versioning
 from restful_checker.engine.normalizer import normalize_paths
 from restful_checker.engine.openapi_loader import load_openapi
 from restful_checker.engine.path_grouper import group_paths
-from restful_checker.checks.version_checker import check_versioning
-from restful_checker.checks.naming_checker import check_naming
-from restful_checker.report.html_report import generate_html
-from restful_checker.checks.http_method_checker import check_http_methods
-from restful_checker.checks.status_code_checker import check_status_codes
-from restful_checker.checks.param_consistency_checker import check_param_consistency
-from restful_checker.checks.query_filter_checker import check_query_filters
-from restful_checker.checks.https_checker import check_https_usage
-from restful_checker.checks.content_type_checker import check_content_type
-from restful_checker.checks.resource_nesting_checker import check_resource_nesting
 from restful_checker.report.extract_json_from_html import extract_json_from_html
+from restful_checker.report.html_report import generate_html
 
 CheckOutput = Tuple[List[str], float]  # a runtime alias: subscripted builtins need 3.9
 
@@ -35,6 +35,43 @@ def _per_path(
     runs = [check(raw, paths.get(raw, {})) for raw in sorted(raw_paths)]
     messages = [message for run_messages, _ in runs for message in run_messages]
     return messages, sum(score for _, score in runs) / len(runs)
+
+
+def _analyze_group(
+    base_path: str, info: dict[str, set[str]], paths: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    methods = sorted(info["collection"].union(info["item"]))
+    items = [
+        f"<strong>Routes:</strong> {escape(', '.join(sorted(info['raw'])))}",
+        f"<strong>HTTP methods:</strong> {escape(', '.join(methods or ['none']))}",
+    ]
+    scores: list[float] = []
+
+    def process_section(title: str, output: CheckOutput) -> None:
+        items.append(f"### {title}")
+        items.extend(output[0])
+        scores.append(output[1])
+
+    # Run all checkers for this resource
+    raw = info["raw"]
+    process_section("Versioning", check_versioning(base_path))
+    process_section("Naming", check_naming(base_path))
+    process_section("HTTP Methods", check_http_methods(base_path, set(methods)))
+    process_section("Status Codes", _per_path(check_status_codes, raw, paths))
+    process_section("Content Types", _per_path(check_content_type, raw, paths))
+    process_section("Response Examples", _per_path(check_response_examples, raw, paths))
+    process_section("Error Format", _per_path(check_error_format, raw, paths))
+
+    # Analyze each raw path (used for GETs, filters, nesting, etc.)
+    for raw_path in sorted(raw):
+        path_obj = paths.get(raw_path, {})
+        if "get" in path_obj and not raw_path.endswith("}"):
+            process_section("Filters", check_query_filters(raw_path, path_obj))
+        process_section("Pagination", check_pagination(raw_path, path_obj))
+        process_section("Resource Nesting", check_resource_nesting(raw_path, path_obj))
+
+    score = round(sum(scores) / len(scores), 2)
+    return {"title": base_path, "items": items, "score": score}
 
 
 def analyze_api(
@@ -67,65 +104,27 @@ def analyze_api(
 
     # Analyze each grouped resource
     for base_path, info in resources.items():
-        items = [
-            f"<strong>Routes:</strong> {escape(', '.join(sorted(info['raw'])))}",
-            f"<strong>HTTP methods:</strong> "
-            f"{escape(', '.join(sorted(info['collection'].union(info['item'])) or ['none']))}",
-        ]
-
-        block_score = 0.0
-        section_count = 0
-
-        def process_section(title: str, messages: list[str], score: float) -> None:
-            nonlocal block_score, section_count
-            block_score += score
-            section_count += 1
-            items.append(f"### {title}")
-            items.extend(messages)
-
-        # Run all checkers for this resource
-        process_section("Versioning", *check_versioning(base_path))
-        process_section("Naming", *check_naming(base_path))
-        process_section("HTTP Methods", *check_http_methods(base_path, info['collection'].union(info['item'])))
-        process_section("Status Codes", *_per_path(check_status_codes, info["raw"], paths))
-        process_section("Content Types", *_per_path(check_content_type, info["raw"], paths))
-        process_section("Response Examples", *_per_path(check_response_examples, info["raw"], paths))
-        process_section("Error Format", *_per_path(check_error_format, info["raw"], paths))
-
-        # Analyze each raw path (used for GETs, filters, nesting, etc.)
-        for raw_path in sorted(info["raw"]):
-            path_obj = paths.get(raw_path, {})
-            if "get" in path_obj and not raw_path.endswith("}"):
-                process_section("Filters", *check_query_filters(raw_path, path_obj))
-            process_section("Pagination", *check_pagination(raw_path, path_obj))
-            process_section("Resource Nesting", *check_resource_nesting(raw_path, path_obj))
-
-        normalized_score = round(block_score / section_count, 2) if section_count > 0 else 1.0
-
-        report.append({
-            "title": base_path,
-            "items": items,
-            "score": normalized_score
-        })
-        score_sum += normalized_score
+        block = _analyze_group(base_path, info, paths)
+        report.append(block)
+        score_sum += block["score"]
         total_blocks += 1
 
     # Global checks
     https_msgs, https_score = check_https_usage(data)
-    report.append({
-        "title": "SSL",
-        "items": ["### Servers"] + https_msgs,
-        "score": round(https_score, 2)
-    })
+    report.append(
+        {"title": "SSL", "items": ["### Servers"] + https_msgs, "score": round(https_score, 2)}
+    )
     score_sum += https_score
     total_blocks += 1
 
     param_msgs, param_score = check_param_consistency(paths)
-    report.append({
-        "title": "Global Parameter Consistency",
-        "items": ["### Parameters"] + param_msgs,
-        "score": round(param_score, 2)
-    })
+    report.append(
+        {
+            "title": "Global Parameter Consistency",
+            "items": ["### Parameters"] + param_msgs,
+            "score": round(param_score, 2),
+        }
+    )
     score_sum += param_score
     total_blocks += 1
 
