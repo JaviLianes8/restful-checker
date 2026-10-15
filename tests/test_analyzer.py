@@ -29,7 +29,9 @@ def test_return_value_has_the_documented_keys(tmp_path: Path) -> None:
     result = run(tmp_path, document({"/v1/users": {"get": ok_operation("200", "404")}}))
     assert set(result) == {"html_path", "json_path", "json_report"}
     assert Path(result["html_path"]) == tmp_path / "out" / "rest_report.html"
-    assert json.loads(Path(result["json_path"]).read_text(encoding="utf-8")) == result["json_report"]
+    assert (
+        json.loads(Path(result["json_path"]).read_text(encoding="utf-8")) == result["json_report"]
+    )
 
 
 def test_item_paths_are_checked_against_their_own_operations(tmp_path: Path) -> None:

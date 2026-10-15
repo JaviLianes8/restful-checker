@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 import requests
 import yaml
 
-from restful_checker import __version__
+from restful_checker import __version__ as __version__
 from restful_checker.engine.analyzer import analyze_api
 
 try:

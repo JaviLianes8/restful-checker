@@ -40,7 +40,7 @@ def test_non_json_bodies_are_errors() -> None:
     messages, score = check_content_type("/a", responses("application/xml"))
     assert any("response 200 does not use application/json" in m for m in messages)
     assert score == 0.0
-    body = {"post": {"requestBody": {"content": {"text/csv": {}}}}}
+    body: dict[str, Any] = {"post": {"requestBody": {"content": {"text/csv": {}}}}}
     messages, score = check_content_type("/a", body)
     assert any("POST /a requestBody does not use application/json" in m for m in messages)
     assert score == 0.0
@@ -50,7 +50,7 @@ def test_content_type_success_messages_and_odd_nodes() -> None:
     assert check_content_type("/a", {}) == (["✅ No request or response bodies to validate"], 1.0)
     odd = {"get": {"requestBody": [], "responses": {"200": None, "204": {"content": []}}}}
     assert check_content_type("/a", {"x": 1, **odd})[1] == 1.0
-    ok = {"post": {"requestBody": {"content": {"application/json": {}}}}}
+    ok: dict[str, Any] = {"post": {"requestBody": {"content": {"application/json": {}}}}}
     assert check_content_type("/a", ok)[0] == [
         "✅ All request and response bodies use application/json"
     ]
@@ -74,7 +74,7 @@ def error_schema(schema: Any, code: Any = "404") -> dict[str, Any]:
 
 
 def test_error_format() -> None:
-    good = {"properties": {"code": {}, "message": {}}}
+    good: dict[str, Any] = {"properties": {"code": {}, "message": {}}}
     assert check_error_format("/a", error_schema(good))[0] == [
         "✅ All error responses include 'code' and 'message'"
     ]
@@ -82,7 +82,8 @@ def test_error_format() -> None:
     messages, score = check_error_format("/a", error_schema({"properties": {"code": {}}}))
     assert any("should include &#x27;code&#x27; and &#x27;message&#x27;" in m for m in messages)
     assert score == 0.8
-    for schema in ({}, {"properties": []}, "x"):
+    schemas: tuple[Any, ...] = ({}, {"properties": []}, "x")
+    for schema in schemas:
         messages, _ = check_error_format("/a", error_schema(schema, code="default"))
         assert any("has no structured schema" in m for m in messages)
     assert check_error_format("/a", error_schema(good, code="200"))[0] == [

@@ -43,12 +43,16 @@ def test_filters() -> None:
     assert check_query_filters("/v1/users/{id}", get_with())[0] == [
         "✅ Skipped query filter check (single resource)"
     ]
-    assert check_query_filters("/v1/users", {})[0] == ["✅ No GET operation to validate for filters"]
+    assert check_query_filters("/v1/users", {})[0] == [
+        "✅ No GET operation to validate for filters"
+    ]
     assert any("has no query filters" in m for m in check_query_filters("/v1/users", get_with())[0])
     typed = {"name": "status", "in": "query", "schema": {"type": "string"}}
     assert check_query_filters("/v1/users", get_with(typed))[1] == 1.0
     vague = {"name": "q", "in": "query", "schema": {"type": "string"}}
-    assert any("none look like useful filters" in m for m in check_query_filters("/u", get_with(vague))[0])
+    assert any(
+        "none look like useful filters" in m for m in check_query_filters("/u", get_with(vague))[0]
+    )
     obj = {"name": "sort", "in": "query", "schema": {"type": "object"}}
     assert any("type `object`" in m for m in check_query_filters("/u", get_with(obj))[0])
     untyped = {"name": "sort", "in": "query", "schema": "x"}
@@ -73,7 +77,10 @@ def test_nesting() -> None:
 
 
 def test_parameter_consistency() -> None:
-    assert check_param_consistency({"/a/{userId}": {}}) == (["✅ Path parameters look consistent"], 1.0)
+    assert check_param_consistency({"/a/{userId}": {}}) == (
+        ["✅ Path parameters look consistent"],
+        1.0,
+    )
     messages, _ = check_param_consistency({"/a/{userId}": {}, "/b/{userid}": {}})
     assert any("Inconsistent parameter naming: userId, userid" in m for m in messages)
     messages, _ = check_param_consistency({"/a/{user_id}": {}, "/b/{orderId}": {}})
@@ -84,7 +91,10 @@ def test_parameter_consistency() -> None:
 
 
 def test_https() -> None:
-    assert check_https_usage({"servers": [{"url": "https://a"}]}) == (["✅ All servers use HTTPS"], 1.0)
+    assert check_https_usage({"servers": [{"url": "https://a"}]}) == (
+        ["✅ All servers use HTTPS"],
+        1.0,
+    )
     assert check_https_usage({"servers": [{"url": "https://a"}, {"url": "http://b"}]})[1] == 0.0
     assert check_https_usage({})[1] == 0.8
     assert check_https_usage({"servers": "https://a"})[1] == 0.8

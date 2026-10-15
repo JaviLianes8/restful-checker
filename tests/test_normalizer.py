@@ -22,7 +22,7 @@ def test_only_operation_fields_are_methods() -> None:
 
 
 def test_every_operation_key_is_read() -> None:
-    item = {key: {"responses": {}} for key in OPERATION_KEYS}
+    item: dict[str, Any] = {key: {"responses": {}} for key in OPERATION_KEYS}
     assert list(normalize_paths({"paths": {"/a": item}})["/a"]) == list(OPERATION_KEYS)
 
 
@@ -119,6 +119,11 @@ def test_responses_object_given_as_reference() -> None:
     assert normalize_paths(doc)["/a"]["get"]["responses"] == {"204": {}}
 
 
+def test_content_that_is_not_a_map_is_kept() -> None:
+    doc = {"paths": {"/a": {"get": {"responses": {"200": {"content": "text"}}}}}}
+    assert normalize_paths(doc)["/a"]["get"]["responses"]["200"] == {"content": "text"}
+
+
 def test_media_type_given_as_reference_and_without_schema() -> None:
     doc = {
         "paths": {"/a": {"get": {"responses": {"200": {"content": {"a/b": {"$ref": "#/m"}}}}}}},
@@ -139,7 +144,7 @@ def test_reference_chains_cycles_and_dead_ends() -> None:
 
 
 def test_long_reference_chain_stops() -> None:
-    root = {f"r{i}": {"$ref": f"#/r{i + 1}"} for i in range(40)}
+    root: dict[str, Any] = {f"r{i}": {"$ref": f"#/r{i + 1}"} for i in range(40)}
     root["r40"] = {"end": True}
     assert resolve({"$ref": "#/r0"}, root) != {"end": True}
     assert resolve({"$ref": "#/r10"}, root) == {"end": True}
