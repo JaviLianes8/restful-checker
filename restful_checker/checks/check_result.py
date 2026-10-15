@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from restful_checker.report.rest_docs import linkify as linkify  # importable here in 3.1
+
 
 class CheckResult:
     """

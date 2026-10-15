@@ -21,6 +21,10 @@ from restful_checker.checks.version_checker import check_versioning
 from restful_checker.engine.normalizer import normalize_paths
 from restful_checker.engine.openapi_loader import load_openapi
 from restful_checker.engine.path_grouper import group_paths
+from restful_checker.report.extract_json_from_html import (  # importable here in 3.1
+    extract_json_from_html as extract_json_from_html,
+)
+from restful_checker.report.html_report import generate_html as generate_html
 from restful_checker.report.html_report import write_reports
 
 CheckOutput = Tuple[List[str], float]  # a runtime alias: subscripted builtins need 3.9
@@ -87,7 +91,8 @@ def analyze_api(
     Args:
         path (str or Path): Path to the OpenAPI file (.json or .yaml/.yml).
         output_dir (str or Path): Output directory for the report (default: "html").
-        output_format (str): Not used here, but compatible with caller (html, json, both).
+        output_format (str): Ignored, kept for compatibility: both reports are always
+            written.
 
     Returns:
         dict: Contains:

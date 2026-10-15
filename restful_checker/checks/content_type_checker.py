@@ -10,7 +10,11 @@ from restful_checker.checks.check_result import CheckResult
 def is_json_media_type(media_type: object) -> bool:
     """Tell whether a media type is JSON: application/json, with or without parameters,
     or any type with the +json structured syntax suffix (RFC 6839), such as
-    application/problem+json (RFC 9457)."""
+    application/problem+json (RFC 9457).
+
+    >>> is_json_media_type("application/json; charset=utf-8"), is_json_media_type("text/xml")
+    (True, False)
+    """
     if not isinstance(media_type, str):
         return False
     essence = media_type.split(";", 1)[0].strip().lower()

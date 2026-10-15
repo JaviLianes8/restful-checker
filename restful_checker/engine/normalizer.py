@@ -49,10 +49,17 @@ def resolve(node: Any, root: Any) -> Any:
     return node
 
 
+def _parameter(param: Any, root: Any) -> Any:
+    param = resolve(param, root)
+    if isinstance(param, dict) and "schema" in param:
+        return {**param, "schema": _schema(param["schema"], root)}
+    return param
+
+
 def _parameters(raw: Any, root: Any) -> list[Any]:
     if not isinstance(raw, list):
         return []
-    return [resolve(param, root) for param in raw]
+    return [_parameter(param, root) for param in raw]
 
 
 def _merge_parameters(shared: list[Any], own: list[Any]) -> list[Any]:

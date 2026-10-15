@@ -106,15 +106,29 @@ print(f"Score: {result['json_report']['score']}")
 `analyze_api(path, output_dir="html", output_format="html")` writes both reports and
 returns `html_path`, `json_path` and `json_report` (the JSON report as a dictionary). It
 raises `OSError` when the file cannot be read or the report written, and `ValueError` when
-the file is not JSON or YAML holding a mapping, has another extension, or is nested too
-deeply to read.
+the file is not valid JSON or YAML, does not hold a mapping, has another extension, or is
+nested too deeply to read.
 
 Each check is also a function of its own, returning `(messages, score)`: plain-text
-messages starting with ✅, ⚠️ or ❌, and a score from 0.0 to 1.0. They live in
-`restful_checker.checks`: `check_versioning`, `check_naming`, `check_http_methods`,
-`check_status_codes`, `check_content_type`, `check_response_examples`,
-`check_error_format`, `check_query_filters`, `check_pagination`, `check_resource_nesting`,
-`check_param_consistency` and `check_https_usage`.
+messages starting with ✅, ⚠️ or ❌, and a score from 0.0 to 1.0.
+
+| Function | Module (`restful_checker.checks.`) |
+|----------|------------------------------------|
+| `check_versioning` | `version_checker` |
+| `check_naming` | `naming_checker` |
+| `check_http_methods` | `http_method_checker` |
+| `check_status_codes`, `covers` | `status_code_checker` |
+| `check_content_type`, `is_json_media_type`, `is_binary_media_type` | `content_type_checker` |
+| `check_response_examples` | `response_example_checker` |
+| `check_error_format`, `is_structured_error` | `check_error_format` |
+| `check_query_filters` | `query_filter_checker` |
+| `check_pagination`, `is_pagination_parameter` | `pagination_checker` |
+| `check_resource_nesting` | `resource_nesting_checker` |
+| `check_param_consistency` | `param_consistency_checker` |
+| `check_https_usage`, `server_kind` | `https_checker` |
+
+These, `analyze_api`, the command and the report layouts are the stable API; other names
+in the submodules stay importable for existing code but may change.
 
 ```python
 from restful_checker.checks.naming_checker import check_naming

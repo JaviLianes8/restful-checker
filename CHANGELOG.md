@@ -48,9 +48,9 @@ listed.
   "Version segment exists but no dynamic resource parameter is found" on every static
   collection (`check_resource_static_only` is kept but no longer called).
 - Naming catches kebab-case verbs (`get-users`, `create-order`, `add-item`; not `add-ons` or
-  `post-` compounds such as `post-processing`) and lower-case `do` and `add` compounds
-  (`addtocart`, `dologin`), while nouns such as `documents`, `domains`, `downloads`,
-  `addresses`, `additions` and `addons` stay clean.
+  `post-` compounds such as `post-processing`). Lower-case `do` and `add` compounds
+  (`addtocart`, `dologin`) stay errors as in 3.1.1, while nouns such as `documents`,
+  `domains`, `downloads`, `addresses`, `additions` and `addons` are no longer flagged.
 - Check messages are plain text. 3.1.1 returned them HTML-escaped with a "More info" link
   (`&#x27;code&#x27;`); the HTML report now escapes them and adds the link itself. Report
   blocks hold plain `Routes: ...` and `HTTP methods: ...` lines, and `generate_html`
@@ -58,8 +58,10 @@ listed.
 - The JSON report (`json_report` and `rest_report.json`) is built from the same data as the
   HTML instead of being parsed back from it. Its layout is unchanged; a message keeps any
   symbol or "More info" text that is part of the route it quotes.
-- `import restful_checker` no longer loads the analyzer; `restful_checker.analyze_api` is
-  imported on first use.
+- `analyze_api` raises `ValueError` for malformed YAML (with the parser's error as its
+  cause; 3.1.1 raised `yaml.YAMLError`) and for a valid JSON or YAML document that is not a
+  mapping (3.1.1 raised `AttributeError`). Malformed JSON keeps raising
+  `json.JSONDecodeError`, a `ValueError`.
 - Python 3.8 or newer is required (3.1.1 declared 3.7 but could not run there). Metadata
   lives in `pyproject.toml`; `setup.py`, `MANIFEST.in` and `requirements.txt` are gone.
 - Messages use a comma where they used a long dash; single resources show "Skipped
@@ -86,7 +88,8 @@ listed.
   status codes, content types, examples and error format. Before, these checks looked the
   route up by its grouped name and always passed.
 - Path-level parameters apply to every operation, and local `$ref`s to path items,
-  parameters, request bodies, responses, media types and schemas are followed. Malformed
+  parameters (and their schemas), request bodies, responses, media types and schemas are
+  followed. Malformed
   `responses` or `content` (a list, a string) no longer crash a check.
 - Naming no longer flags nouns that start like a verb (`posts`, `documents`, `addresses`,
   `updates`) and no longer warns about the `v1` version segment.
@@ -111,10 +114,12 @@ listed.
 
 ### Added
 
-- `from restful_checker import analyze_api`, `restful_checker.__version__` and a `py.typed`
-  marker; `analyze_api` returns `json_path`, as the README example uses.
+- `from restful_checker import analyze_api` (imported on first use, so `import
+  restful_checker` stays light), `restful_checker.__version__` and a `py.typed` marker;
+  `analyze_api` returns `json_path`, as the README example uses.
 - Helpers next to the checks: `is_json_media_type`, `is_binary_media_type`,
-  `is_pagination_parameter`, `is_structured_error`, `server_kind` and `covers`.
+  `is_pagination_parameter`, `is_structured_error`, `server_kind` and `covers`. Names
+  importable from the submodules in 3.1.1 stay importable.
 - The command line helpers live in `restful_checker.cli_io`; `restful_checker.main` still
   exposes them under the same names.
 

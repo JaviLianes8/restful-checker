@@ -10,6 +10,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from restful_checker.report.extract_json_from_html import (  # importable here in 3.1
+    extract_json_from_html as extract_json_from_html,
+)
 from restful_checker.report.json_report import build_json_report, ordered
 from restful_checker.report.rest_docs import REST_BEST_PRACTICES, SECTION_KEYS
 

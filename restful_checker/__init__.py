@@ -2,23 +2,29 @@
 
 ``analyze_api`` is imported on first use, so ``import restful_checker`` stays light.
 
->>> import restful_checker
->>> restful_checker.__all__
-['analyze_api']
+>>> import json, pathlib, tempfile
+>>> from restful_checker import analyze_api
+>>> folder = pathlib.Path(tempfile.mkdtemp())
+>>> spec = folder / "openapi.json"
+>>> doc = {"openapi": "3.1.0", "info": {"title": "t", "version": "1"},
+...        "servers": [{"url": "https://api.example.com"}], "paths": {}}
+>>> _ = spec.write_text(json.dumps(doc), encoding="utf-8")
+>>> analyze_api(spec, output_dir=folder)["json_report"]["score"]
+100
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import typing as _typing
 
 __version__ = "3.2.0"
 __all__ = ["analyze_api"]
 
-if TYPE_CHECKING:
+if _typing.TYPE_CHECKING:
     from restful_checker.engine.analyzer import analyze_api
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> _typing.Any:
     if name == "analyze_api":
         from restful_checker.engine.analyzer import analyze_api
 
@@ -27,4 +33,5 @@ def __getattr__(name: str) -> Any:
 
 
 def __dir__() -> list[str]:
-    return sorted([*globals(), "analyze_api"])
+    names = [name for name in globals() if name.startswith("__") or name in __all__]
+    return sorted({*names, *__all__})

@@ -4,9 +4,14 @@ import argparse
 import json
 import os
 import sys
+import tempfile as tempfile  # these four were importable from here in 3.1
 import webbrowser
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse as urlparse
+
+import requests as requests
+import yaml as yaml
 
 from restful_checker import __version__ as __version__
 from restful_checker.cli_io import _print
