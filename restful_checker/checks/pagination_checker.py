@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+import re
+from typing import Any
+
 from restful_checker.checks.check_result import CheckResult
 
-def check_pagination(path: str, methods: dict) -> tuple[list[str], float]:
+
+def check_pagination(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that GET operations on the given path support pagination parameters.
 
@@ -16,15 +22,18 @@ def check_pagination(path: str, methods: dict) -> tuple[list[str], float]:
     result = CheckResult("Pagination")
     evaluated = False
 
+    # A single resource such as /users/{id} is not a collection: nothing to page through.
+    if re.search(r"/\{[^}]+}/?$", path):
+        result.success("Skipped pagination check (single resource)")
+        return result.messages, result.finalize_score()
+
     for method_name, operation in methods.items():
         if method_name.lower() != "get" or not isinstance(operation, dict):
             continue
 
         evaluated = True
-        parameters = operation.get("parameters", [])
-        param_names = {
-            p.get("name", "") for p in parameters if isinstance(p, dict)
-        }
+        parameters = operation.get("parameters") or []
+        param_names = {p.get("name", "") for p in parameters if isinstance(p, dict)}
 
         if not {"page", "limit"} & param_names:
             result.warning(

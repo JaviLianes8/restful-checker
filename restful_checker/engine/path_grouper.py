@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import re
 from collections import defaultdict
+from typing import Any
 
-def group_paths(paths):
+
+def group_paths(paths: dict[str, Any]) -> defaultdict[str, dict[str, set[str]]]:
     """
     Group OpenAPI paths by base resource, distinguishing collection vs item endpoints.
 
@@ -18,11 +22,9 @@ def group_paths(paths):
             - 'item': set of HTTP methods for item endpoints
             - 'raw': original raw paths
     """
-    resources = defaultdict(lambda: {
-        "collection": set(),
-        "item": set(),
-        "raw": set()
-    })
+    resources: defaultdict[str, dict[str, set[str]]] = defaultdict(
+        lambda: {"collection": set(), "item": set(), "raw": set()}
+    )
 
     for path, methods in paths.items():
         raw = path

@@ -1,7 +1,12 @@
-from datetime import datetime
-from pathlib import Path
+from __future__ import annotations
+
+import html as html_lib
 import importlib.resources
 import json
+import pkgutil
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from restful_checker.report.extract_json_from_html import extract_json_from_html
 
@@ -27,14 +32,30 @@ def get_score_level(score: int) -> tuple[str, str]:
     return "Excellent", "#27ae60"
 
 
-def generate_html(report: list[dict], score: int, output: str | Path = None, write_json=True) -> str:
+def _read_css() -> str:
+    # importlib.resources.files arrived in 3.9; pkgutil keeps 3.8 working.
+    if hasattr(importlib.resources, "files"):
+        resource = importlib.resources.files("restful_checker.data").joinpath("style.css")
+        return resource.read_text(encoding="utf-8")
+    data = pkgutil.get_data("restful_checker.data", "style.css")
+    if data is None:
+        raise FileNotFoundError("style.css")
+    return data.decode("utf-8")
+
+
+def generate_html(
+    report: list[dict[str, Any]],
+    score: int,
+    output: str | Path | None = None,
+    write_json: bool = True,
+) -> str:
     output = Path(output or Path(__file__).parent.parent / "html" / "rest_report.html")
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     level, color = get_score_level(score)
 
     try:
-        inline_css = importlib.resources.files("restful_checker.data").joinpath("style.css").read_text()
+        inline_css = _read_css()
     except Exception:
         inline_css = "/* Failed to load CSS */"
 
@@ -48,20 +69,27 @@ def generate_html(report: list[dict], score: int, output: str | Path = None, wri
         '<div class="container">',
         "<h1>RESTful API Report</h1>",
         f"<p><strong>Generated:</strong> {now}</p>",
-        f"<div class='section'><div class='score' style='background:{color}'>{score}% - {level}</div></div>"
+        f"<div class='section'><div class='score' style='background:{color}'>{score}% - "
+        f"{level}</div></div>",
     ]
 
     for block in report:
         block_score = block.get("score", 1.0)
         emoji, level_class = (
-            ("🔴", "section-error") if block_score < 0.5 else
-            ("🟡", "section-warn") if block_score < 0.7 else
-            ("🟢", "section-ok")
+            ("🔴", "section-error")
+            if block_score < 0.5
+            else ("🟡", "section-warn")
+            if block_score < 0.7
+            else ("🟢", "section-ok")
         )
 
-        html_parts.append(f"<div class='section {level_class}'><h2>{emoji}&nbsp;{block['title']} <span class='score-inline'>({round(block_score * 100)}%)</span></h2>")
+        title = html_lib.escape(str(block["title"]))
+        html_parts.append(
+            f"<div class='section {level_class}'><h2>{emoji}&nbsp;{title} "
+            f"<span class='score-inline'>({round(block_score * 100)}%)</span></h2>"
+        )
 
-        section_messages = []
+        section_messages: list[str] = []
         for item in block["items"]:
             if item.startswith("### "):
                 if section_messages:
@@ -86,6 +114,8 @@ def generate_html(report: list[dict], score: int, output: str | Path = None, wri
     # Optional: generate matching .json file
     if write_json:
         json_output = output.with_suffix(".json")
-        json_output.write_text(json.dumps(extract_json_from_html(output), indent=2), encoding="utf-8")
+        json_output.write_text(
+            json.dumps(extract_json_from_html(output), indent=2), encoding="utf-8"
+        )
 
     return str(output)

@@ -1,17 +1,21 @@
+from __future__ import annotations
+
 import argparse
 import json
 import os
 import sys
-import tempfile
 import webbrowser
-import requests
-import yaml
-
 from pathlib import Path
-from urllib.parse import urlparse
-from restful_checker.engine.analyzer import analyze_api
+from typing import Any
 
-__version__ = "3.1.1"
+from restful_checker import __version__ as __version__
+from restful_checker.cli_io import _print
+from restful_checker.cli_io import is_remote as is_remote
+from restful_checker.cli_io import is_valid_file as is_valid_file
+from restful_checker.cli_io import is_valid_openapi as is_valid_openapi
+from restful_checker.cli_io import print_error as print_error
+from restful_checker.cli_io import resolve_openapi_path as resolve_openapi_path
+from restful_checker.engine.analyzer import analyze_api
 
 try:
     from restful_checker.tools.help_restful_checker import show_help
@@ -20,78 +24,7 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 
-def print_error(msg):
-    """
-    Print a formatted error message to the console.
-    """
-    print(f"❌ {msg}")
-
-
-def is_valid_file(path):
-    """
-    Check if a path points to a valid OpenAPI file with .json, .yaml, or .yml extension.
-    
-    Args:
-        path (str): Path to check.
-    
-    Returns:
-        bool: True if the path is a valid file with a correct extension.
-    """
-    return os.path.isfile(path) and path.endswith(('.json', '.yaml', '.yml'))
-
-
-def is_valid_openapi(path):
-    """
-    Validate if the file at the given path is a valid OpenAPI or Swagger document.
-    
-    Args:
-        path (str): Path to the OpenAPI file.
-    
-    Returns:
-        bool: True if the file contains a valid OpenAPI or Swagger root key.
-    """
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f) if path.endswith('.json') else yaml.safe_load(f)
-            return 'openapi' in data or 'swagger' in data
-    except Exception as e:
-        print_error(f"Error parsing OpenAPI file: {e}")
-        return False
-
-
-def resolve_openapi_path(path):
-    """
-    Resolve a given path to a valid local file.
-    If the path is a URL, downloads the content to a temporary file.
-    
-    Args:
-        path (str): URL or local path to the OpenAPI definition.
-    
-    Returns:
-        str: Path to the resolved local file (original or temporary).
-    """
-    parsed = urlparse(path)
-    if parsed.scheme in ("http", "https"):
-        try:
-            response = requests.get(path, timeout=10)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            print_error(f"Failed to fetch URL: {e}")
-            sys.exit(1)
-
-        suffix = '.yaml' if path.endswith(('.yaml', '.yml')) else '.json'
-        tmp = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix=suffix, encoding='utf-8')
-        tmp.write(response.text)
-        tmp.flush()
-        return tmp.name
-    elif is_valid_file(path):
-        return path
-    else:
-        print_error(f"Invalid file: '{path}'\n👉 Must be a local .json/.yaml/.yml file or a valid URL")
-        sys.exit(1)
-
-
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     """
     Parse command-line arguments using argparse.
 
@@ -103,24 +36,33 @@ def parse_arguments():
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("path", nargs="?", help="Path or URL to OpenAPI file (.json, .yaml, .yml)")
-    parser.add_argument("--output-format", choices=["html", "json", "both"], default="html",
-                        help="Output format: html, json, or both (default: html)")
-    parser.add_argument("--output-folder", default="html",
-                        help="Destination folder for output reports (default: ./html)")
-    parser.add_argument("--open", action="store_true",
-                        help="Open the generated HTML report in the default browser")
-    parser.add_argument("-q", "--quiet", action="store_true",
-                        help="Suppress all output except errors")
+    parser.add_argument(
+        "--output-format",
+        choices=["html", "json", "both"],
+        default="html",
+        help="Output format: html, json, or both (default: html)",
+    )
+    parser.add_argument(
+        "--output-folder",
+        default="html",
+        help="Destination folder for output reports (default: ./html)",
+    )
+    parser.add_argument(
+        "--open", action="store_true", help="Open the generated HTML report in the default browser"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress all output except errors"
+    )
     return parser.parse_args()
 
 
-def run_checker(args):
+def run_checker(args: argparse.Namespace) -> int:
     """
     Main execution function that handles file validation, parsing, and analysis.
-    
+
     Args:
         args (argparse.Namespace): Parsed CLI arguments.
-    
+
     Returns:
         int: Exit code (0 for success, 1 for error).
     """
@@ -129,18 +71,28 @@ def run_checker(args):
         return 0
 
     path = resolve_openapi_path(args.path)
+    try:
+        return _check(args, path)
+    finally:
+        if is_remote(args.path) and path != args.path:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
+
+def _check(args: Any, path: str) -> int:
     if not is_valid_openapi(path):
-        print_error(f"The file '{path}' is not a valid OpenAPI document.")
+        print_error(f"The file '{args.path}' is not a valid OpenAPI document.")
         return 1
 
     try:
         result = analyze_api(path, output_dir=args.output_folder)
-        html_path = os.path.abspath(result['html_path'])
+        html_path = os.path.abspath(result["html_path"])
 
         if args.output_format in ["html", "both"]:
             if not args.quiet:
-                print(f"✅ HTML report generated: {html_path}")
+                _print(f"✅ HTML report generated: {html_path}")
             if args.open:
                 webbrowser.open(Path(html_path).resolve().as_uri())
 
@@ -149,7 +101,7 @@ def run_checker(args):
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
             if not args.quiet:
-                print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
+                _print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
 
         return 0
     except Exception as e:
@@ -157,7 +109,7 @@ def run_checker(args):
         return 1
 
 
-def main():
+def main() -> None:
     """
     CLI entry point. Parses arguments and executes the checker.
     """

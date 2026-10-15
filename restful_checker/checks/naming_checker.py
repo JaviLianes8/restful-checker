@@ -1,23 +1,28 @@
-import re
-from restful_checker.checks.check_result import CheckResult
+from __future__ import annotations
 
-COMMON_VERBS = [
-    "get", "create", "update", "delete", "post", "put", "fetch", "make", "do", "add"
-]
+import re
+
+from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.verb_words import starts_with_verb
+from restful_checker.checks.version_checker import VERSION_REGEX
+
+COMMON_VERBS = ["get", "create", "update", "delete", "post", "put", "fetch", "make", "do", "add"]
 
 GENERIC_TERMS = {"data", "info", "object", "thing", "stuff", "item"}
 PREPOSITIONS = {"of", "for", "by", "with", "from", "to"}
 
 # === Individual Checks ===
 
-def check_contains_verb(segments: list[str], result: CheckResult):
+
+def check_contains_verb(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         for verb in COMMON_VERBS:
-            if re.fullmatch(rf"{verb}[A-Za-z0-9_]*", segment, re.IGNORECASE):
+            if starts_with_verb(segment, verb):
                 result.error(f"Contains verb-like segment: `{segment}`")
                 break
 
-def check_last_segment_plural(segments: list[str], result: CheckResult):
+
+def check_last_segment_plural(segments: list[str], result: CheckResult) -> None:
     if not segments:
         return
     last = segments[-1]
@@ -26,29 +31,37 @@ def check_last_segment_plural(segments: list[str], result: CheckResult):
     if not re.search(r"s\b", last):
         result.warning(f"Last segment `{last}` might not be plural (use plural for collections)")
 
-def check_pascal_or_camel_case(segments: list[str], result: CheckResult):
+
+def check_pascal_or_camel_case(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         if re.match(r"[A-Z][a-z]+[A-Z]", segment):  # PascalCase
             result.error(f"PascalCase not recommended in URL segment: `{segment}`")
         elif re.match(r"[a-z]+[A-Z][a-z]+", segment):  # camelCase
             result.error(f"camelCase not recommended in URL segment: `{segment}`")
 
-def check_contains_numbers(segments: list[str], result: CheckResult):
+
+def check_contains_numbers(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
+        if VERSION_REGEX.fullmatch(segment):
+            continue  # `v1` is the version segment the versioning check asks for
         if re.search(r"[a-zA-Z]+[0-9]+", segment):
             result.warning(f"Segment `{segment}` contains mixed alphanumeric name")
 
-def check_generic_resource_name(segments: list[str], result: CheckResult):
+
+def check_generic_resource_name(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         if segment.lower() in GENERIC_TERMS:
             result.warning(f"Segment `{segment}` is too generic")
 
-def check_segment_preposition(segments: list[str], result: CheckResult):
+
+def check_segment_preposition(segments: list[str], result: CheckResult) -> None:
     for segment in segments:
         if segment.lower() in PREPOSITIONS:
-            result.error(f"Segment `{segment}` looks like a preposition — not RESTful")
+            result.error(f"Segment `{segment}` looks like a preposition, not RESTful")
+
 
 # === Main Function ===
+
 
 def check_naming(base_path: str) -> tuple[list[str], float]:
     """

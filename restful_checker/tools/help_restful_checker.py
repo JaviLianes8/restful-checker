@@ -1,15 +1,18 @@
-def show_help():
+from __future__ import annotations
+
+
+def show_help() -> None:
     """
     Show usage examples and help for restful-checker CLI.
     """
-    print("""
+    text = """
 ╔════════════════════════════════════════════════════════════════╗
 ║                       RESTFUL-CHECKER CLI                      ║
 ╚════════════════════════════════════════════════════════════════╝
 
 Usage:
-    restful-checker <file.json|file.yaml|file.yml> 
-                    [--output-format html|json|both] 
+    restful-checker <file.json|file.yaml|file.yml>
+                    [--output-format html|json|both]
                     [--output-folder ./route]
 
 Description:
@@ -23,7 +26,11 @@ Examples:
     restful-checker https://example.com/openapi.json --output-format json --output-folder reports
 
 As Python module:
-    python -m restful_checker ./openapi.yaml 
-              --output-format html 
+    python -m restful_checker ./openapi.yaml
+              --output-format html
               --output-folder ./output
-""")
+"""
+    try:
+        print(text)
+    except UnicodeEncodeError:  # a legacy console code page has no box drawing
+        print(text.encode("ascii", "replace").decode("ascii"))

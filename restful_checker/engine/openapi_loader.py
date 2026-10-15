@@ -1,8 +1,13 @@
-import json
-import yaml
-from pathlib import Path
+from __future__ import annotations
 
-def load_openapi(path):
+import json
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+def load_openapi(path: str | Path) -> Any:
     """
     Load an OpenAPI specification from a JSON or YAML file.
 
@@ -19,10 +24,11 @@ def load_openapi(path):
     path = Path(path)
     suffix = path.suffix.lower()
 
-    with open(path, encoding='utf-8') as f:
-        if suffix in ('.yaml', '.yml'):
+    # utf-8-sig: RFC 8259 lets a parser ignore a byte order mark, and editors write one.
+    with open(path, encoding="utf-8-sig") as f:
+        if suffix in (".yaml", ".yml"):
             return yaml.safe_load(f)
-        elif suffix == '.json':
+        elif suffix == ".json":
             return json.load(f)
         else:
             raise ValueError(f"Unsupported file extension: {suffix}")

@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+from typing import Any
+
 from restful_checker.checks.check_result import CheckResult
 
-def check_error_format(path: str, methods: dict) -> tuple[list[str], float]:
+
+def check_error_format(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check that 4xx/5xx responses use a structured error format
     including at least 'code' and 'message' fields.
@@ -19,24 +24,34 @@ def check_error_format(path: str, methods: dict) -> tuple[list[str], float]:
         if not isinstance(operation, dict):
             continue
 
-        responses = operation.get("responses", {})
+        responses = operation.get("responses")
+        if not isinstance(responses, dict):
+            continue
         for status_code, response in responses.items():
+            if not isinstance(response, dict):
+                continue
             if status_code == "default" or str(status_code).startswith(("4", "5")):
-                content = response.get("content", {})
-                for media_type, media_info in content.items():
+                content = response.get("content")
+                if not isinstance(content, dict):
+                    continue
+                for media_info in content.values():
                     evaluated = True
-                    schema = media_info.get("schema", {})
+                    schema = media_info.get("schema", {}) if isinstance(media_info, dict) else {}
 
-                    if "properties" not in schema:
+                    if not isinstance(schema, dict) or not isinstance(
+                        schema.get("properties"), dict
+                    ):
                         result.warning(
-                            f"{method_name.upper()} {path} error {status_code} has no structured schema"
+                            f"{method_name.upper()} {path} error {status_code} has no structured "
+                            "schema"
                         )
                     else:
                         properties = schema["properties"]
                         required_keys = ("code", "message")
                         if not all(key in properties for key in required_keys):
                             result.warning(
-                                f"{method_name.upper()} {path} error {status_code} should include 'code' and 'message' fields"
+                                f"{method_name.upper()} {path} error {status_code} should include "
+                                "'code' and 'message' fields"
                             )
 
     if evaluated and not result.messages:
