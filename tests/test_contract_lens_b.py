@@ -151,3 +151,25 @@ def test_text_content_is_not_binary() -> None:
 def test_upper_case_operations_carry_servers() -> None:
     doc = oas3({"GET": {"servers": [{"url": "http://plain.example.com"}]}})
     assert check_https_usage(doc) == ERROR
+
+
+@pytest.mark.parametrize("version", ["3.0.3", "3.1.0", "3.2.0"])
+@pytest.mark.parametrize("extra", [{}, {"description": "d"}])
+def test_a_plain_ref_reads_the_same_in_every_version(
+    tmp_path: Path, version: str, extra: dict[str, Any]
+) -> None:
+    schemas = {"Bin": {"type": "string", "format": "binary"}, "Obj": {"type": "object"}}
+    bin_ref = {"$ref": "#/components/schemas/Bin", **extra}
+    params = [
+        {"name": "status", "in": "query", "schema": {"$ref": "#/components/schemas/Obj", **extra}}
+    ]
+    body = {"content": {"application/x-thing": {"schema": bin_ref}}}
+    get = {"parameters": params, "responses": {"200": body}}
+    doc = document({"/v1/files": {"get": get}}, components={"schemas": schemas}, openapi=version)
+    result = analyze_api(write_json(tmp_path, doc), output_dir=tmp_path)["json_report"]
+    content = [m["message"] for m in all_messages(result, "Content Types")]
+    assert content == [
+        "All request and response bodies use application/json, binary or multipart types"
+    ]
+    filters = [m["message"] for m in all_messages(result, "Filters")]
+    assert "Query parameter `status` has type `object`, consider using primitives" in filters

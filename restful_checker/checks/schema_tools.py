@@ -26,6 +26,18 @@ def _schemas(schema: Any) -> list[dict[str, Any]]:
     return found
 
 
+def keyword(schema: Any, name: str) -> Any:
+    """The value of a keyword the schema or one of its ``allOf`` members gives, or None.
+
+    >>> keyword({"allOf": [{"type": "string"}, {"format": "binary"}]}, "format")
+    'binary'
+    """
+    for node in _schemas(schema):
+        if name in node:
+            return node[name]
+    return None
+
+
 def declares_type(schema: Any) -> bool:
     """Tell whether a schema says what its values are: a ``type``, an ``enum`` or a ``const``,
     itself or in every member of a ``oneOf``/``anyOf``, or in one of its ``allOf`` members.

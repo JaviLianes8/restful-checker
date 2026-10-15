@@ -36,6 +36,8 @@ def _target(schema: Any, root: Any) -> Any:
     if target is schema or not isinstance(target, dict) or not _siblings_apply(root):
         return target
     siblings = {key: value for key, value in schema.items() if key != "$ref"}
+    if not siblings:
+        return target
     return {"allOf": [target, siblings]}  # both apply: neither replaces the other
 
 

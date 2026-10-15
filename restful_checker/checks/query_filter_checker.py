@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
-from restful_checker.checks.schema_tools import declares_type
+from restful_checker.checks.schema_tools import declares_type, keyword
 
 
 def _useful(name: object, useful_names: set[str]) -> bool:
@@ -75,7 +75,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
             schema = param.get("schema", {})
             # OpenAPI 2.0 puts `type` on the parameter itself, 3.x inside `schema` (or in the
             # schema of its one `content` media type).
-            param_type = schema.get("type") if isinstance(schema, dict) else None
+            param_type = keyword(schema, "type")
             param_type = param_type or param.get("type")
 
             if param_type == "object":

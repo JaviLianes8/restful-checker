@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.schema_tools import keyword
 
 # Sequences of JSON values (OpenAPI 3.2 sequential media types: JSON Lines, NDJSON and the
 # RFC 7464 JSON text sequence).
@@ -59,10 +60,11 @@ def is_binary_media_type(media_type: object, media: object = None) -> bool:
     schema = media.get("schema") if isinstance(media, dict) else None
     if not isinstance(schema, dict):
         return False
-    raw = "contentMediaType" in schema and not {"contentEncoding", "type"} & set(schema)
-    if raw and not essence.startswith("text/"):
-        return True  # OpenAPI 3.1 and later describe raw file contents this way
-    return (schema.get("type"), schema.get("format")) == ("string", "binary")
+    given = {name: keyword(schema, name) for name in ("type", "format", "contentEncoding")}
+    raw = keyword(schema, "contentMediaType") is not None
+    if raw and given["type"] is None and given["contentEncoding"] is None:
+        return not essence.startswith("text/")  # raw file contents (OpenAPI 3.1 and later)
+    return (given["type"], given["format"]) == ("string", "binary")
 
 
 def _accepted(content: dict[Any, Any]) -> tuple[bool, bool]:
