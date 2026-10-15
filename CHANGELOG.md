@@ -29,10 +29,16 @@ listed.
   'message' or problem details"; the warning adds "or RFC 9457 problem details members".
 - Binary and multipart bodies are accepted by Content Types: `application/octet-stream`,
   `application/pdf`, `application/zip`, `application/gzip`, any `image`, `audio`, `video`,
-  `font` or `multipart` type, and any media type whose schema is `type: string,
-  format: binary`. When one of them was accepted the success line reads "All request and
+  `font` or `multipart` type, any `+zip` type, and any media type whose schema is
+  `type: string, format: binary` (OpenAPI 3.0) or has a `contentMediaType` without a
+  `contentEncoding` (OpenAPI 3.1). When one of them was accepted the success line reads "All request and
   response bodies use application/json, binary or multipart types".
   `application/x-www-form-urlencoded`, `text/*` and XML bodies are still errors.
+- JSON Lines (`application/jsonl`, `application/x-ndjson`) and JSON text sequences
+  (`application/json-seq`, `+json-seq`) count as JSON; the `itemSchema` of OpenAPI 3.2
+  sequential media types is read for examples.
+- `application/problem+xml` (RFC 9457) is a structured error body.
+- Query filters accept the JSON:API `filter[...]` family as useful filters.
 - Pagination accepts `offset`, `cursor`, `per_page`, `page_size`, `page_token`, their camel
   case forms and JSON:API `page[...]` next to `page` and `limit`, compared ignoring case.
 - Swagger 2.0 documents are judged by `schemes` instead of always getting "No servers
@@ -96,6 +102,11 @@ listed.
 - Item paths such as `/v1/users/{userId}` and paths with a trailing slash are checked for
   status codes, content types, examples and error format. Before, these checks looked the
   route up by its grouped name and always passed.
+- In OpenAPI 3.1 and 3.2 documents, keywords next to a schema `$ref` (`examples`,
+  `properties`) apply, as JSON Schema 2020-12 says; 2.0 and 3.0 still ignore them.
+- Local references are read as RFC 6901 says: the fragment is percent-decoded before it is
+  split (`#/a%2Fb` is `a` then `b`), and array indexes are plain ASCII digits without a
+  leading zero.
 - Path-level parameters apply to every operation, and local `$ref`s to path items,
   parameters (and their schemas), request bodies, responses, media types and schemas are
   followed. Malformed
