@@ -110,3 +110,18 @@ the suite run with `-x` without bytecode (the e2e module excluded), the file res
 | M48 | parenthesis groups kept | `extract_json_from_html.py` | killed | `tests/test_report.py::test_old_style_titles_are_still_read` |
 | M49 | analyzer imported eagerly | `__init__.py` | killed | `tests/test_decisions_report.py::test_import_is_light_and_analyze_api_loads_on_use` |
 | M50 | linear brace pattern reverted | `path_grouper.py` | killed after a new contract | `tests/test_contract_mutations.py::test_long_routes_are_handled_in_linear_time[group]` |
+
+## QA lenses (item 19)
+
+Each lens was a fresh reviewer that read the certification rules first, worked in its own
+clone, ran things rather than reading, and reported back privately. One reviewer ran at a
+time; heavy runs went to the second build machine under a turn.
+
+| Lens | Round | Head | Verdict | Findings and outcome |
+| --- | --- | --- | --- | --- |
+| a | 1 | dfb84d5 | FAIL | parameter schema `$ref`s not followed (false "no defined type"), malformed YAML raised `yaml.YAMLError` instead of the documented `ValueError`, README import path for the checks, 3.1.1 names no longer importable, CHANGELOG wording, typing names in `dir()`, missing examples. Fixed in 9bb4810 (`tests/test_contract_lens_a.py`) |
+| a | 2 | 9bb4810 | PASS | two low notes: typed query parameters through `oneOf`/`anyOf`/`allOf`/`enum`/`content`, and the stable helpers named in the CHANGELOG. Fixed in 73226df |
+| b | 1 | 73226df | FAIL | path and operation servers and 2.0 operation schemes ignored; 3.1 `$ref` siblings dropped; RFC 6901 decoding; `contentMediaType`, sequential JSON, `problem+xml`, JSON:API `filter[...]`; status-code conventions, missing servers and minor versions documented as choices. Fixed in e78d370 and 0694382 (`tests/test_contract_lens_b.py`) |
+| b | 2 | 0694382 | FAIL | siblings replaced the target's keywords; typed `text/*` read as binary; upper-case operation servers. Fixed in f1a90a0 |
+| b | 3 | f1a90a0 | FAIL | plain 3.1 `$ref`s wrapped in `allOf` hid the target's `type` and `format`. Fixed in 427f487 |
+| b | 4 | 427f487 | PASS | independent resolver agrees with every count on GitHub's 3.0.3 and 3.1 descriptions; learn.openapis.org verdicts as predicted |
