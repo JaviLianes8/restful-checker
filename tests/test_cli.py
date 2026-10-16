@@ -190,3 +190,21 @@ def test_main_and_version(
     with pytest.raises(SystemExit):
         cli.main()
     assert capsys.readouterr().out.strip().endswith(cli.__version__)
+
+
+def test_the_module_names_the_command() -> None:
+    import subprocess
+    import sys
+
+    done = subprocess.run([sys.executable, "-m", "restful_checker", "--version"],
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    assert done.stdout.strip() == f"restful-checker {cli.__version__}"
+
+
+def test_help_lists_every_option(capsys: pytest.CaptureFixture[str]) -> None:
+    from restful_checker.tools.help_restful_checker import show_help
+
+    show_help()
+    out = capsys.readouterr().out
+    for option in ("--output-format", "--output-folder", "--open", "--quiet", "--version"):
+        assert option in out

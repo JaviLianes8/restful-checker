@@ -14,6 +14,7 @@ Usage:
     restful-checker <file.json|file.yaml|file.yml>
                     [--output-format html|json|both]
                     [--output-folder ./route]
+                    [--open] [-q | --quiet] [--version]
 
 Description:
     - Checks RESTful best practices in an OpenAPI definition.

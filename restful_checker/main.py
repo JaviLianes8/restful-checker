@@ -38,7 +38,8 @@ def parse_arguments() -> argparse.Namespace:
         argparse.Namespace: Parsed arguments object.
     """
     parser = argparse.ArgumentParser(
-        description="Check RESTful API compliance from OpenAPI definitions and generate reports."
+        prog="restful-checker",
+        description="Check RESTful API compliance from OpenAPI definitions and generate reports.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("path", nargs="?", help="Path or URL to OpenAPI file (.json, .yaml, .yml)")

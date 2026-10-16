@@ -103,6 +103,9 @@ listed.
 - The reports are written whole or not at all, and a lone surrogate in the document is
   written as its escape: a failing run no longer leaves an empty HTML report next to a
   stale JSON one.
+- `python -m restful_checker --version` and its usage lines name the command
+  `restful-checker` (they named `__main__.py`), and the help shown without arguments lists
+  `--open`, `-q` and `--version`.
 - A closed or broken standard output no longer changes the exit code (it was 120).
 - The check functions accept operation and path keys of any type (YAML can produce
   integers or `null`) when called directly.
