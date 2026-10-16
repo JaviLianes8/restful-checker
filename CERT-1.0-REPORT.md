@@ -16,7 +16,7 @@ Progress:
 - [x] Five QA lenses report PASS (item 19)
 - [x] Independent reviewer (item 16)
 - [x] Gates (item 15)
-- [ ] PR open and trace guard CLEAN (item 17); merge and publish left to the maintainer
+- [x] PR #2 open and trace guard CLEAN (item 17); merge and publish left to the maintainer
 
 ## Scorecard
 
