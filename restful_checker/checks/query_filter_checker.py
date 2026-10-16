@@ -1,9 +1,26 @@
+"""Query filters of collection GET operations."""
+
 from __future__ import annotations
 
 import re
 from typing import Any
 
 from restful_checker.checks.check_result import CheckResult
+from restful_checker.checks.schema_tools import declares_type, keyword
+
+
+def _useful(name: object, useful_names: set[str]) -> bool:
+    # JSON:API reserves the `filter[...]` family for filtering.
+    lowered = str(name if name is not None else "").lower()
+    return lowered in useful_names or (lowered.startswith("filter[") and lowered.endswith("]"))
+
+
+def _typed(param: dict[str, Any]) -> bool:
+    if declares_type(param.get("schema")) or "enum" in param:
+        return True
+    content = param.get("content")
+    media = list(content.values()) if isinstance(content, dict) else []
+    return any(isinstance(m, dict) and declares_type(m.get("schema")) for m in media)
 
 
 def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], float]:
@@ -11,6 +28,10 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
     Check that GET collection endpoints support meaningful query filters.
 
     Skips paths that point to a single resource (ending in /{id}).
+
+    >>> get = {"get": {"parameters": [{"name": "status", "in": "query", "type": "string"}]}}
+    >>> check_query_filters("/v1/users", get)
+    (['✅ Collection endpoints support query filters'], 1.0)
 
     Args:
         path (str): The API path to check.
@@ -22,7 +43,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
     result = CheckResult("query_filters")
 
     # Skip if it's a single-resource path like /users/{id}
-    if re.search(r"/\{[^}]+}/?$", path):
+    if re.search(r"/\{[^{}]+}/?$", path):
         result.success("Skipped query filter check (single resource)")
         return result.messages, result.finalize_score()
 
@@ -41,7 +62,7 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
         )
     else:
         useful_names = {"filter", "status", "type", "sort", "limit"}
-        has_meaningful = any(str(p.get("name", "")).lower() in useful_names for p in query_params)
+        has_meaningful = any(_useful(p.get("name"), useful_names) for p in query_params)
 
         if not has_meaningful:
             result.warning(
@@ -52,15 +73,16 @@ def check_query_filters(path: str, methods: dict[str, Any]) -> tuple[list[str], 
         for param in query_params:
             name = param.get("name", "")
             schema = param.get("schema", {})
-            # OpenAPI 2.0 puts `type` on the parameter itself, 3.x inside `schema`.
-            param_type = schema.get("type") if isinstance(schema, dict) else None
+            # OpenAPI 2.0 puts `type` on the parameter itself, 3.x inside `schema` (or in the
+            # schema of its one `content` media type).
+            param_type = keyword(schema, "type")
             param_type = param_type or param.get("type")
 
             if param_type == "object":
                 result.warning(
                     f"Query parameter `{name}` has type `object`, consider using primitives"
                 )
-            elif not param_type:
+            elif not param_type and not _typed(param):
                 result.warning(f"Query parameter `{name}` has no defined type")
 
     if not result.messages:

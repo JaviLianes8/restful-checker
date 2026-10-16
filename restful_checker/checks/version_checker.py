@@ -1,11 +1,14 @@
+"""Version segment of a route."""
+
 from __future__ import annotations
 
 import re
 
 from restful_checker.checks.check_result import CheckResult
 
-VERSION_REGEX = re.compile(r"^v[0-9]+$", re.IGNORECASE)
-PARAM_REGEX = re.compile(r"\{[^}]+}")
+# `v1`, `v2.1`, and the pre-release forms `v1beta1`, `v2alpha` (as Kubernetes and Google use).
+VERSION_REGEX = re.compile(r"^v[0-9]+(\.[0-9]+)*((alpha|beta)[0-9]*)?$", re.IGNORECASE)
+PARAM_REGEX = re.compile(r"\{[^{}]+}")
 
 # === Individual Checks ===
 
@@ -43,6 +46,8 @@ def check_resource_is_id(resource_parts: list[str], result: CheckResult) -> None
 
 
 def check_resource_static_only(resource_parts: list[str], result: CheckResult) -> None:
+    # Kept for callers of 3.1; `check_versioning` no longer runs it, since every collection
+    # route such as /v1/users is static and the warning fired on all of them.
     if resource_parts and all(not PARAM_REGEX.search(part) for part in resource_parts):
         result.warning("Version segment exists but no dynamic resource parameter is found.")
 
@@ -59,7 +64,11 @@ def check_versioning(base_path: str) -> tuple[list[str], float]:
     - Only one version segment
     - It's close to the root (ideally first or second)
     - Is followed by a proper resource, not an ID
-    - Static-only routes are flagged
+
+    >>> check_versioning("/v1beta1/users")
+    (['✅ Versioning detected'], 1.0)
+    >>> check_versioning("/users")
+    (['❌ No version segment found in route.'], 0.0)
 
     Args:
         base_path (str): The API base path to check (normalized with {id} replacements).
@@ -84,7 +93,6 @@ def check_versioning(base_path: str) -> tuple[list[str], float]:
     resource_parts = parts[version_index + 1 :]
 
     check_resource_is_id(resource_parts, result)
-    check_resource_static_only(resource_parts, result)
 
     if not result.messages:
         result.success("Versioning detected")

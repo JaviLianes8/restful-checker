@@ -76,11 +76,11 @@ def error_schema(schema: Any, code: Any = "404") -> dict[str, Any]:
 def test_error_format() -> None:
     good: dict[str, Any] = {"properties": {"code": {}, "message": {}}}
     assert check_error_format("/a", error_schema(good))[0] == [
-        "✅ All error responses include 'code' and 'message'"
+        "✅ All error responses use 'code' and 'message' or problem details"
     ]
     assert check_error_format("/a", error_schema(good, code=500))[1] == 1.0
     messages, score = check_error_format("/a", error_schema({"properties": {"code": {}}}))
-    assert any("should include &#x27;code&#x27; and &#x27;message&#x27;" in m for m in messages)
+    assert any("should include 'code' and 'message' fields" in m for m in messages)
     assert score == 0.8
     schemas: tuple[Any, ...] = ({}, {"properties": []}, "x")
     for schema in schemas:

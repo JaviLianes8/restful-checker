@@ -103,7 +103,7 @@ def test_routes_of_one_group_do_not_repeat_success_lines(tmp_path: Path) -> None
 
 def fetch(monkeypatch: pytest.MonkeyPatch, body: bytes, content_type: str) -> Any:
     response = FakeResponse(body, content_type)
-    monkeypatch.setattr("restful_checker.cli_io.requests.get", lambda url, timeout: response)
+    monkeypatch.setattr("restful_checker.cli_io.requests.get", lambda url, **_: response)
     local = cli.resolve_openapi_path("https://a.example/openapi.yaml")
     try:
         with open(local, encoding="utf-8") as f:
@@ -128,7 +128,7 @@ def test_invalid_remote_document_names_the_url(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     response = FakeResponse(b"{}")
-    monkeypatch.setattr("restful_checker.cli_io.requests.get", lambda url, timeout: response)
+    monkeypatch.setattr("restful_checker.cli_io.requests.get", lambda url, **_: response)
     args = Namespace(
         path="https://a.example/x.json", output_folder=str(tmp_path), output_format="html",
         open=False, quiet=True,

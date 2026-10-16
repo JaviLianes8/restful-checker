@@ -87,7 +87,7 @@ def test_analysis_errors_return_one(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 def serve(monkeypatch: pytest.MonkeyPatch, body: bytes) -> list[str]:
     seen: list[str] = []
 
-    def fake_get(url: str, timeout: float) -> FakeResponse:
+    def fake_get(url: str, **_: object) -> FakeResponse:
         seen.append(url)
         return FakeResponse(body)
 
@@ -153,7 +153,7 @@ def test_cleanup_failure_is_ignored(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 
 
 def test_remote_failure_exits(monkeypatch: pytest.MonkeyPatch) -> None:
-    def failing(url: str, timeout: float) -> Any:
+    def failing(url: str, **_: object) -> Any:
         raise requests.ConnectionError("down")
 
     monkeypatch.setattr("restful_checker.cli_io.requests.get", failing)

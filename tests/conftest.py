@@ -68,6 +68,12 @@ class FakeResponse:
     def raise_for_status(self) -> None:
         pass
 
+    def iter_content(self, chunk_size: int | None = None) -> list[bytes]:
+        return [self.content]
+
+    def close(self) -> None:
+        pass
+
 
 def problems(messages: list[str]) -> list[str]:
     """Messages of a checker that are errors or warnings."""

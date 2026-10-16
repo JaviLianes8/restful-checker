@@ -27,9 +27,11 @@ def test_verb_words_are_errors(segment: str) -> None:
     assert score == 0.0
 
 
-def test_kebab_verbs_stay_unflagged_as_before() -> None:
-    messages, _ = check_naming("/v1/get-users")
-    assert not any("verb" in m for m in messages)
+@pytest.mark.parametrize("segment", ["get-users", "create-order", "delete-user", "add-item"])
+def test_kebab_verbs_are_errors(segment: str) -> None:
+    messages, score = check_naming(f"/v1/{segment}")
+    assert any(f"verb-like segment: `{segment}`" in m for m in messages)
+    assert score == 0.0
 
 
 def test_version_segment_is_not_mixed_alphanumeric() -> None:
@@ -55,9 +57,9 @@ def test_other_naming_rules() -> None:
     assert check_naming("")[0]
 
 
-def test_messages_link_to_the_naming_guide() -> None:
-    message = problems(check_naming("/v1/user")[0])[0]
-    assert 'href="https://restfulapi.net/resource-naming/"' in message
+def test_messages_are_plain_text() -> None:
+    message = problems(check_naming("/v1/<user>")[0])[0]
+    assert message == "⚠️ Last segment `<user>` might not be plural (use plural for collections)"
 
 
 def test_versioning_rules() -> None:
@@ -68,5 +70,5 @@ def test_versioning_rules() -> None:
     assert check_versioning("/a/b/v1/users/{id}")[1] == 0.8
     assert check_versioning("/v1")[1] == 0.0
     assert check_versioning("/v1/{id}")[1] == 0.0
-    assert check_versioning("/v1/users")[1] == 0.8
+    assert check_versioning("/v1/users") == (["✅ Versioning detected"], 1.0)
     assert check_versioning("/a/v1/users/{id}")[1] == 1.0

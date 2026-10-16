@@ -1,12 +1,23 @@
+"""Messages and score of one check category."""
+
 from __future__ import annotations
 
-from restful_checker.report.rest_docs import linkify
+from restful_checker.report.rest_docs import linkify as linkify  # importable here in 3.1
 
 
 class CheckResult:
     """
-    Collects and formats result messages for a single check category,
-    and computes a final score based on errors and warnings.
+    Collects the messages of a single check category and computes its score.
+
+    Messages are plain text with a leading status symbol; the HTML report escapes them
+    and adds the "More info" link of the category.
+
+    >>> result = CheckResult("naming")
+    >>> result.warning("Segment `<x>` is too generic")
+    >>> result.messages
+    ['⚠️ Segment `<x>` is too generic']
+    >>> result.finalize_score()
+    0.8
     """
 
     def __init__(self, category: str) -> None:
@@ -28,7 +39,7 @@ class CheckResult:
         Args:
             msg (str): Description of the error.
         """
-        self.messages.append(linkify(f"❌ {msg}", self.category))
+        self.messages.append(f"❌ {msg}")
         self.has_error = True
 
     def warning(self, msg: str) -> None:
@@ -38,7 +49,7 @@ class CheckResult:
         Args:
             msg (str): Description of the warning.
         """
-        self.messages.append(linkify(f"⚠️ {msg}", self.category))
+        self.messages.append(f"⚠️ {msg}")
         if not self.has_error:
             self.score -= 0.2
 

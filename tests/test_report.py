@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -43,13 +44,14 @@ def test_errors_then_warnings_then_the_rest() -> None:
 
 def test_round_trip(tmp_path: Path) -> None:
     report = [
-        {"title": "/v1/a", "items": ["<strong>HTTP methods:</strong> GET, POST", "### One",
+        {"title": "/v1/a", "items": ["HTTP methods: GET, POST", "### One",
                                     "❌ bad", "⚠️ meh", "### Two", "✅ fine"], "score": 0.4},
         {"title": "/v1/b", "items": ["### Three", "✅ ok"], "score": 0.6},
         {"title": "SSL", "items": ["### Servers", "✅ ok"], "score": 1.0},
     ]  # fmt: skip
     out = Path(generate_html(report, 77, output=tmp_path / "r.html"))
     data = extract_json_from_html(out)
+    assert data == json.loads(out.with_suffix(".json").read_text(encoding="utf-8"))
     assert data["score"] == 77
     first, second, ssl = data["sections"]
     assert first["path"] == "/v1/a" and first["score"] == 40
@@ -78,7 +80,7 @@ def test_section_colour_thresholds(tmp_path: Path, score: float, css: str) -> No
 
 
 def test_methods_line_reading_none(tmp_path: Path) -> None:
-    report = [{"title": "/x", "items": ["<strong>HTTP methods:</strong> none"], "score": 1.0}]
+    report = [{"title": "/x", "items": ["HTTP methods: none"], "score": 1.0}]
     out = Path(generate_html(report, 1, output=tmp_path / "r.html"))
     assert "httpMethods" not in extract_json_from_html(out)["sections"][0]
 

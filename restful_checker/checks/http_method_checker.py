@@ -1,3 +1,5 @@
+"""HTTP method semantics of the operations of one route."""
+
 from __future__ import annotations
 
 import re
@@ -5,7 +7,9 @@ import re
 from restful_checker.checks.check_result import CheckResult
 from restful_checker.checks.verb_words import contains_verb, words
 
-VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH"}
+# The methods RFC 9110 registers that OpenAPI has a field for, PATCH (RFC 5789) and the
+# QUERY operation of OpenAPI 3.2. CONNECT has no Path Item field.
+VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE", "QUERY"}
 ACTIONS_FOR_GET = {"create", "update", "delete", "remove"}
 ACTIONS_FOR_POST_DELETE = {"delete", "remove"}
 ACTIONS_FOR_PUT_CREATE = {"create"}
@@ -61,7 +65,7 @@ def check_get_with_side_effect(path: str, method: str, result: CheckResult) -> N
 
 def check_post_on_resource_id(path: str, method: str, result: CheckResult) -> None:
     if method.upper() == "POST":
-        if re.search(r"/\{[^}]+}", path):
+        if re.search(r"/\{[^{}]+}", path):
             result.warning(
                 f"POST used with resource ID in path `{path}`, consider using PUT or PATCH"
             )
@@ -69,7 +73,7 @@ def check_post_on_resource_id(path: str, method: str, result: CheckResult) -> No
 
 def check_delete_without_id(path: str, method: str, result: CheckResult) -> None:
     if method.upper() == "DELETE":
-        if not re.search(r"/\{[^}]+}", path):
+        if not re.search(r"/\{[^{}]+}", path):
             result.warning(
                 f"DELETE without ID in path `{path}`, consider confirming if this is intentional"
             )
@@ -82,6 +86,11 @@ def check_http_methods(path: str, methods: set[str]) -> tuple[list[str], float]:
     """
     Analyze a set of HTTP methods for RESTful convention violations.
 
+    >>> check_http_methods("/v1/users", {"GET", "HEAD", "OPTIONS"})
+    (['✅ HTTP method usage looks valid'], 1.0)
+    >>> check_http_methods("/v1/resetPassword", {"GET"})[0]
+    ['❌ GET used for side-effect path: `/v1/resetPassword`, should be POST or PUT']
+
     Args:
         path (str): API path to analyze.
         methods (set[str]): HTTP methods used in that path.
@@ -91,7 +100,7 @@ def check_http_methods(path: str, methods: set[str]) -> tuple[list[str], float]:
     """
     result = CheckResult("http_methods")
 
-    for method in methods:
+    for method in map(str, methods):
         check_unusual_method(method, result)
         check_get_with_action(path, method, result)
         check_post_with_delete(path, method, result)

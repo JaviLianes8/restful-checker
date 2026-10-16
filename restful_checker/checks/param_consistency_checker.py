@@ -1,3 +1,5 @@
+"""Path parameter names across the whole document."""
+
 from __future__ import annotations
 
 import re
@@ -10,6 +12,11 @@ from restful_checker.checks.check_result import CheckResult
 def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float]:
     """
     Check for consistent path parameter naming across the OpenAPI spec.
+
+    >>> check_param_consistency({"/v1/users/{userId}": {}, "/v1/orders/{orderId}": {}})
+    (['✅ Path parameters look consistent'], 1.0)
+    >>> check_param_consistency({"/v1/users/{id}": {}})
+    (['⚠️ Generic parameter name used: `id`, consider using more specific names'], 0.8)
 
     - Detects parameters with same meaning but different casing (e.g., {UserId}, {user_id})
     - Flags mixed naming styles (snake_case vs camelCase)
@@ -27,7 +34,9 @@ def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float
 
     # Extract all path parameters
     for path in all_paths.keys():
-        for match in re.finditer(r"\{([^}]+)}", path):
+        if not isinstance(path, str):
+            continue
+        for match in re.finditer(r"\{([^{}]+)}", path):
             param = match.group(1)
             param_map[param.lower()].add(param)
             all_params.add(param)
