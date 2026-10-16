@@ -50,3 +50,16 @@ def test_the_guide_is_linked_and_shipped() -> None:
     assert "https://github.com/JaviLianes8/restful-checker/blob/main/GUIDE.md" in README
     assert '"GUIDE.md"' in (root / "pyproject.toml").read_text(encoding="utf-8")
     assert "## The checks" in (root / "GUIDE.md").read_text(encoding="utf-8")
+
+
+def test_the_guide_describes_grouping_as_the_code_does() -> None:
+    from restful_checker.engine.path_grouper import group_paths
+
+    guide = (Path(__file__).resolve().parents[1] / "GUIDE.md").read_text(encoding="utf-8")
+    assert "`/v1/users/{orderId}` form the group `/v1/users/{id}`" in " ".join(guide.split())
+    routes = ("/v1/users", "/v1/users/", "/v1/users/{userId}", "/v1/users/{orderId}")
+    groups = group_paths({route: {"get": {}} for route in routes})
+    assert {k: sorted(v["raw"]) for k, v in groups.items()} == {
+        "/v1/users": ["/v1/users", "/v1/users/"],
+        "/v1/users/{id}": ["/v1/users/{orderId}", "/v1/users/{userId}"],
+    }

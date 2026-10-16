@@ -24,7 +24,8 @@ what the reports hold. The README has the quick start; the CHANGELOG lists every
 ## Groups and scores
 
 Routes are grouped by resource: `{anything}` becomes `{id}` and a trailing `/` is dropped, so
-`/v1/users`, `/v1/users/` and `/v1/users/{userId}` form one group. Each group gets sections
+`/v1/users` and `/v1/users/` form one group, and `/v1/users/{userId}` and
+`/v1/users/{orderId}` form the group `/v1/users/{id}`. Each group gets sections
 (Versioning, Naming, HTTP Methods, Status Codes, Content Types, Response Examples, Error
 Format, then Filters, Pagination and Resource Nesting per route). Two global blocks follow:
 SSL (servers) and Global Parameter Consistency.

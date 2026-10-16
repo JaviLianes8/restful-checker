@@ -15,7 +15,7 @@ Progress:
 - [x] e2e and upgrade from PyPI 3.1.1, every interpreter (items 8, 10)
 - [x] Five QA lenses report PASS (item 19)
 - [ ] Independent reviewer (item 16)
-- [ ] Gates (item 15)
+- [x] Gates (item 15)
 - [ ] PR open and trace guard CLEAN (item 17); merge and publish left to the maintainer
 
 ## Ground truth (item 7)
@@ -135,13 +135,15 @@ time; heavy runs went to the second build machine under a turn.
 | Review | Head | Verdict | Findings and outcome |
 | --- | --- | --- | --- |
 | 1 | 2a46f5c | FAIL (items 6, 11, 13, 16, 18) | 40 mutations of its own on the code changed since `main`: 34 killed, 6 survived (an unresolved lone server, an unclosed `filter[`, `const` as a type, runs of capitals split per letter, operation parameters and request-body media types outside the expansion count); its contracts added in `tests/test_contract_review.py`. `tests/test_cli.py` over 200 lines (split into `tests/test_cli_help.py`); the command's JSON rewrite not atomic (now `write_atomically`); no GUIDE (GUIDE.md added and linked); runtime dependencies (recorded below) |
+| 2 | 5950247 | FAIL (items 6 and 18) | every round-1 finding confirmed fixed; one fresh sweep of 40 (S01 to S40), 35 killed, 5 survived (a nested output folder not created, a Filters section for routes without GET, a quoted charset, schemes with digits or `+`, a capital followed by a digit), closed by `tests/test_contract_review_2.py`; one GUIDE sentence on grouping corrected and pinned by `tests/test_docs.py`; item 13 judged an acceptable deviation that needs the maintainer's acceptance |
 
 ## Decisions for the maintainer
 
 - Runtime dependencies (item 13): PyYAML parses YAML documents and requests fetches remote
   ones, as in 3.1.1; `beautifulsoup4` is gone. Replacing requests with the standard library
   would change certificate and proxy behaviour for existing users, so both stay. This is
-  the one deliberate deviation from "no runtime dependencies".
+  the one deliberate deviation from "no runtime dependencies"; the reviewer judged it sound,
+  and it stands as the maintainer's call to accept before publishing.
 - The flat layout (`restful_checker/` at the root, not `src/`) is kept: 3.1.1 users import
   its submodules.
 - Kept from 3.1.1 and stated in README "Limitations and choices": the expected status codes
