@@ -22,6 +22,7 @@ from restful_checker.cli_io import print_error as print_error
 from restful_checker.cli_io import resolve_openapi_path as resolve_openapi_path
 from restful_checker.cli_remote import safe_url
 from restful_checker.engine.analyzer import analyze_api
+from restful_checker.report.html_report import write_atomically
 
 try:
     from restful_checker.tools.help_restful_checker import show_help
@@ -106,8 +107,8 @@ def _check(args: Any, path: str) -> int:
 
         if args.output_format in ["json", "both"]:
             json_path = os.path.join(args.output_folder, "rest_report.json")
-            with open(json_path, "w", encoding="utf-8", errors="backslashreplace") as f:
-                json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
+            text = json.dumps(result["json_report"], indent=2, ensure_ascii=False)
+            write_atomically(Path(json_path), text)
             if not args.quiet:
                 _print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
 

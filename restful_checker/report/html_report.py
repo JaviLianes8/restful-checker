@@ -127,7 +127,8 @@ def render_html(report: list[dict[str, Any]], score: int, generated: str) -> str
     return "\n".join(parts)
 
 
-def _write(path: Path, text: str) -> None:
+def write_atomically(path: Path, text: str) -> None:
+    """Write a report whole or not at all (a temporary file, then a rename)."""
     # Written whole or not at all: a failing run never leaves a truncated report behind.
     # A lone surrogate (possible in JSON input) is written as its escape, not refused.
     temporary = path.with_name(path.name + ".tmp")
@@ -146,9 +147,9 @@ def write_reports(
     generated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data = build_json_report(report, score, generated)
     output.parent.mkdir(parents=True, exist_ok=True)
-    _write(output, render_html(report, score, generated))
+    write_atomically(output, render_html(report, score, generated))
     if write_json:
-        _write(output.with_suffix(".json"), json.dumps(data, indent=2))
+        write_atomically(output.with_suffix(".json"), json.dumps(data, indent=2))
     return str(output), data
 
 

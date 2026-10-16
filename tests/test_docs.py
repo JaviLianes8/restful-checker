@@ -43,3 +43,10 @@ def test_check_example_prints_what_it_says() -> None:
 def test_links_are_absolute() -> None:
     for target in re.findall(r"\]\(([^)]+)\)", README):
         assert target.startswith(("https://", "#")), target
+
+
+def test_the_guide_is_linked_and_shipped() -> None:
+    root = Path(__file__).resolve().parents[1]
+    assert "https://github.com/JaviLianes8/restful-checker/blob/main/GUIDE.md" in README
+    assert '"GUIDE.md"' in (root / "pyproject.toml").read_text(encoding="utf-8")
+    assert "## The checks" in (root / "GUIDE.md").read_text(encoding="utf-8")

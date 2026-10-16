@@ -148,7 +148,10 @@ print(check_naming("/v1/get-users"))
 # (['❌ Contains verb-like segment: `get-users`'], 0.0)
 ```
 
-## Changes
+## Guide and changes
+
+The [GUIDE](https://github.com/JaviLianes8/restful-checker/blob/main/GUIDE.md) explains how
+documents are read, every rule of every check, the scores and the report layout.
 
 See the [CHANGELOG](https://github.com/JaviLianes8/restful-checker/blob/main/CHANGELOG.md);
 3.2.0 lists every verdict that changed since 3.1.1.

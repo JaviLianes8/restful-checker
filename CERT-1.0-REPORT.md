@@ -13,7 +13,7 @@ Progress:
 - [x] Docs: README, CHANGELOG (items 11, 12)
 - [x] Author mutation round (item 18)
 - [x] e2e and upgrade from PyPI 3.1.1, every interpreter (items 8, 10)
-- [ ] Five QA lenses report PASS (item 19)
+- [x] Five QA lenses report PASS (item 19)
 - [ ] Independent reviewer (item 16)
 - [ ] Gates (item 15)
 - [ ] PR open and trace guard CLEAN (item 17); merge and publish left to the maintainer
@@ -129,3 +129,24 @@ time; heavy runs went to the second build machine under a turn.
 | c | 2 | 7ce0a5a | PASS | 3,000 fuzzed documents and 1,000 hostile pages without a crash or injection, every scaling ratio linear; three notes (operation parameters and request bodies in the expansion count, IPv6 brackets in messages, a temporary file after a failed write) fixed in 85eb2c4 |
 | d | 1 | fae08f1 | PASS | wheel and sdist built and inspected, `twine check --strict`, console script and `python -m` from an empty folder on real documents and a local server, suite from the sdist against the installed package, in-place upgrade from PyPI 3.1.1 with every report difference traced to the CHANGELOG, suite from the wheel on 3.8.20 to 3.14.2 and 3.14.2 free-threaded (566 passed each); two cosmetic notes (program name under `python -m`, options missing from the no-argument help) fixed in the next commit |
 | e | 1 | bd497b6 | PASS with contracts | blind round of 199 mutations over every module: 151 killed, 3 equivalent (A8: every group has a method, so the `none` label is unreachable; SC3: no check reads a `1XX` key; V3: a digit after a verb already counts, 1,080,000 random segments compared), 45 closed by `tests/test_contract_lens_e_cli.py` and `tests/test_contract_lens_e_checks.py`, each checked to fail on its mutant and pass on the original |
+
+## Independent reviewer (item 16)
+
+| Review | Head | Verdict | Findings and outcome |
+| --- | --- | --- | --- |
+| 1 | 2a46f5c | FAIL (items 6, 11, 13, 16, 18) | 40 mutations of its own on the code changed since `main`: 34 killed, 6 survived (an unresolved lone server, an unclosed `filter[`, `const` as a type, runs of capitals split per letter, operation parameters and request-body media types outside the expansion count); its contracts added in `tests/test_contract_review.py`. `tests/test_cli.py` over 200 lines (split into `tests/test_cli_help.py`); the command's JSON rewrite not atomic (now `write_atomically`); no GUIDE (GUIDE.md added and linked); runtime dependencies (recorded below) |
+
+## Decisions for the maintainer
+
+- Runtime dependencies (item 13): PyYAML parses YAML documents and requests fetches remote
+  ones, as in 3.1.1; `beautifulsoup4` is gone. Replacing requests with the standard library
+  would change certificate and proxy behaviour for existing users, so both stay. This is
+  the one deliberate deviation from "no runtime dependencies".
+- The flat layout (`restful_checker/` at the root, not `src/`) is kept: 3.1.1 users import
+  its submodules.
+- Kept from 3.1.1 and stated in README "Limitations and choices": the expected status codes
+  are stricter than RFC 9110, an OpenAPI 3 document without top-level servers warns, and
+  minor version segments (`v1.2`) are accepted.
+- References to other files or URLs are not resolved (deferred, documented).
+- The README links to GUIDE.md and CHANGELOG.md on `main`: publish only after merging.
+- CHANGELOG 3.2.0 is dated 2026-10-15; adjust it if the release goes out later.

@@ -53,6 +53,7 @@ include = [
     "scripts",
     "README.md",
     "CHANGELOG.md",
+    "GUIDE.md",
     "LICENSE",
     "requirements-dev.txt",
 ]
