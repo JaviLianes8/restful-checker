@@ -57,12 +57,11 @@ def check_response_examples(path: str, methods: dict[str, Any]) -> tuple[list[st
             )
 
             if not has_example:
-                key = (method_name.upper(), path, str(status_code))
+                key = (str(method_name).upper(), path, str(status_code))
                 if key not in seen:
                     seen.add(key)
                     result.warning(
-                        f"{method_name.upper()} {path} response {status_code} is missing example "
-                        "or examples"
+                        f"{key[0]} {path} response {status_code} is missing example or examples"
                     )
 
     if not evaluated:

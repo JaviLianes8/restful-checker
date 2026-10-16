@@ -100,7 +100,7 @@ def check_http_methods(path: str, methods: set[str]) -> tuple[list[str], float]:
     """
     result = CheckResult("http_methods")
 
-    for method in methods:
+    for method in map(str, methods):
         check_unusual_method(method, result)
         check_get_with_action(path, method, result)
         check_post_with_delete(path, method, result)

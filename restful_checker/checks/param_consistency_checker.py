@@ -34,6 +34,8 @@ def check_param_consistency(all_paths: dict[str, Any]) -> tuple[list[str], float
 
     # Extract all path parameters
     for path in all_paths.keys():
+        if not isinstance(path, str):
+            continue
         for match in re.finditer(r"\{([^{}]+)}", path):
             param = match.group(1)
             param_map[param.lower()].add(param)

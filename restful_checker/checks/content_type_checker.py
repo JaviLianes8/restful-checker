@@ -104,7 +104,7 @@ def check_content_type(path: str, methods: dict[str, Any]) -> tuple[list[str], f
         if not isinstance(operation, dict):
             continue
 
-        method_upper = method_name.upper()
+        method_upper = str(method_name).upper()
 
         # Check request body
         request = operation.get("requestBody") or {}

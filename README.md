@@ -40,6 +40,9 @@ restful-checker https://api.example.com/openapi.yaml --open
 restful-checker openapi.json --output-format both --output-folder reports
 ```
 
+Remote documents are fetched within 60 seconds and up to 50 MB. Messages show a URL
+without its user, password or query string.
+
 ### Options
 
 | Option | Description | Default |

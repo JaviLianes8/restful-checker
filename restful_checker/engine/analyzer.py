@@ -102,8 +102,10 @@ def analyze_api(
 
     Raises:
         OSError: The file cannot be read or the report cannot be written.
-        ValueError: The file is not JSON or YAML holding a mapping, its extension is not
-            .json, .yaml or .yml, or it is nested too deeply to read.
+        ValueError: The file is not UTF-8 (a byte order mark is allowed) JSON or YAML
+            holding a mapping, its extension is not .json, .yaml or .yml, it is nested too
+            deeply to read, or its references expand past 50,000 operations, responses
+            and media types.
 
     >>> import json, pathlib, tempfile
     >>> folder = pathlib.Path(tempfile.mkdtemp())

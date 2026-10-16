@@ -58,7 +58,7 @@ def check_pagination(path: str, methods: dict[str, Any]) -> tuple[list[str], flo
         return result.messages, result.finalize_score()
 
     for method_name, operation in methods.items():
-        if method_name.lower() != "get" or not isinstance(operation, dict):
+        if str(method_name).lower() != "get" or not isinstance(operation, dict):
             continue
 
         evaluated = True

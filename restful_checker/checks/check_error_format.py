@@ -77,7 +77,7 @@ def check_error_format(path: str, methods: dict[str, Any]) -> tuple[list[str], f
                     schema = media_info.get("schema", {}) if isinstance(media_info, dict) else {}
                     if is_structured_error(media_type, schema):
                         continue
-                    label = f"{method_name.upper()} {path} error {status_code}"
+                    label = f"{str(method_name).upper()} {path} error {status_code}"
                     if merged_properties(schema) is None:
                         result.warning(f"{label} has no structured schema")
                     else:

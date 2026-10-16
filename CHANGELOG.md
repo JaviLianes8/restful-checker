@@ -90,6 +90,22 @@ listed.
 - A document nested too deeply for the JSON or YAML parser raises `ValueError` ("... is
   nested too deeply to read") instead of `RecursionError`; the command reports it and
   exits 1.
+- A document whose references expand past 50,000 operations, responses and media types
+  (a few kilobytes can stand for millions through shared `$ref`s or YAML aliases) raises
+  `ValueError` instead of taking minutes and gigabytes; GitHub's REST description uses
+  about 5,000.
+- Remote documents are downloaded within 60 seconds and 50 MB of decoded bytes; a slow or
+  compressed hostile server can no longer hold or fill the machine. A failed download
+  prints "Failed to fetch <url>: <reason>" (3.1.1 printed the full `requests` message),
+  and every message shows the URL without user, password, query or fragment. A remote
+  body nested too deeply or declaring a charset that cannot decode no longer ends in a
+  traceback.
+- The reports are written whole or not at all, and a lone surrogate in the document is
+  written as its escape: a failing run no longer leaves an empty HTML report next to a
+  stale JSON one.
+- A closed or broken standard output no longer changes the exit code (it was 120).
+- The check functions accept operation and path keys of any type (YAML can produce
+  integers or `null`) when called directly.
 - Very long route names (thousands of capitals, letters or `{` characters) no longer take
   quadratic time in the naming, method, grouping and parameter checks.
 - The package imports and runs on Python 3.8 and 3.9 again.

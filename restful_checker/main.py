@@ -20,6 +20,7 @@ from restful_checker.cli_io import is_valid_file as is_valid_file
 from restful_checker.cli_io import is_valid_openapi as is_valid_openapi
 from restful_checker.cli_io import print_error as print_error
 from restful_checker.cli_io import resolve_openapi_path as resolve_openapi_path
+from restful_checker.cli_remote import safe_url
 from restful_checker.engine.analyzer import analyze_api
 
 try:
@@ -88,7 +89,8 @@ def run_checker(args: argparse.Namespace) -> int:
 
 def _check(args: Any, path: str) -> int:
     if not is_valid_openapi(path):
-        print_error(f"The file '{args.path}' is not a valid OpenAPI document.")
+        shown = safe_url(args.path) if is_remote(args.path) else args.path
+        print_error(f"The file '{shown}' is not a valid OpenAPI document.")
         return 1
 
     try:
@@ -103,7 +105,7 @@ def _check(args: Any, path: str) -> int:
 
         if args.output_format in ["json", "both"]:
             json_path = os.path.join(args.output_folder, "rest_report.json")
-            with open(json_path, "w", encoding="utf-8") as f:
+            with open(json_path, "w", encoding="utf-8", errors="backslashreplace") as f:
                 json.dump(result["json_report"], f, indent=2, ensure_ascii=False)
             if not args.quiet:
                 _print(f"✅ JSON report generated: {os.path.abspath(json_path)}")
@@ -119,7 +121,16 @@ def main() -> None:
     CLI entry point. Parses arguments and executes the checker.
     """
     args = parse_arguments()
-    sys.exit(run_checker(args))
+    code = run_checker(args)
+    try:
+        if sys.stdout is not None:
+            sys.stdout.flush()
+    except OSError:  # a closed pipe: the exit code still tells the result
+        try:
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        except OSError:
+            pass
+    sys.exit(code)
 
 
 if __name__ == "__main__":

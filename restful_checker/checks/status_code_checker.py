@@ -120,7 +120,7 @@ def check_status_codes(path: str, method_map: dict[str, Any]) -> tuple[list[str]
     for method, details in method_map.items():
         if not isinstance(details, dict):
             continue  # not an Operation Object (path-level `parameters`, `summary`, ...)
-        method_upper = method.upper()
+        method_upper = str(method).upper()
         raw_responses = details.get("responses")
         # YAML reads an unquoted `200:` as an integer; ranges are read as `2XX`.
         responses = (
