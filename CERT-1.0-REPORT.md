@@ -125,3 +125,5 @@ time; heavy runs went to the second build machine under a turn.
 | b | 2 | 0694382 | FAIL | siblings replaced the target's keywords; typed `text/*` read as binary; upper-case operation servers. Fixed in f1a90a0 |
 | b | 3 | f1a90a0 | FAIL | plain 3.1 `$ref`s wrapped in `allOf` hid the target's `type` and `format`. Fixed in 427f487 |
 | b | 4 | 427f487 | PASS | independent resolver agrees with every count on GitHub's 3.0.3 and 3.1 descriptions; learn.openapis.org verdicts as predicted |
+| c | 1 | e6ad2d4 | FAIL | references or YAML aliases growing work with the cube of the input; remote downloads unbounded in time and size; tracebacks on deep remote bodies and odd charsets; credentials and queries printed; a lone surrogate left an empty HTML report; exit 120 on a closed stdout; direct calls with non-string keys. Fixed in 7ce0a5a (`tests/test_contract_lens_c.py`) |
+| c | 2 | 7ce0a5a | PASS | 3,000 fuzzed documents and 1,000 hostile pages without a crash or injection, every scaling ratio linear; three notes (operation parameters and request bodies in the expansion count, IPv6 brackets in messages, a temporary file after a failed write) fixed in 85eb2c4 |
