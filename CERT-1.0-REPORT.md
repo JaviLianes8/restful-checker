@@ -14,9 +14,43 @@ Progress:
 - [x] Author mutation round (item 18)
 - [x] e2e and upgrade from PyPI 3.1.1, every interpreter (items 8, 10)
 - [x] Five QA lenses report PASS (item 19)
-- [ ] Independent reviewer (item 16)
+- [x] Independent reviewer (item 16)
 - [x] Gates (item 15)
 - [ ] PR open and trace guard CLEAN (item 17); merge and publish left to the maintainer
+
+## Scorecard
+
+| # | Item | Verdict | Evidence |
+| --- | --- | --- | --- |
+| 1 | API reviewed for stability | PASS | `analyze_api`, the twelve checks, the CLI options and the report layouts keep their names, signatures and defaults; every 3.1.1 importable name still imports; six helpers added; every behaviour change in CHANGELOG 3.2.0, compared side by side with PyPI 3.1.1 by lenses a and d |
+| 2 | `__all__` exact | PASS | `__all__ == ["analyze_api"]`, `dir()` shows nothing else public (`tests/test_contract_lens_a.py`) |
+| 3 | Docstrings with runnable examples | PASS | the package, `analyze_api`, the twelve checks and the six helpers have `>>>` examples; every module's doctests run in `tests/test_doctests.py` |
+| 4 | Typed end to end | PASS | `mypy --strict restful_checker tests` clean; `py.typed` in the wheel |
+| 5 | Typed, documented, safe errors | PASS | `ValueError` for unreadable, non-mapping, too deep or too expanding documents, `OSError` for files; YAML messages cut at 300 characters; URLs shown without user, password or query |
+| 6 | Contract asserts the full promise | PASS | 619 tests: one contract file per owner decision, real documents, spec facts, fuzz, CLI, every survivor of the author, lens e and reviewer rounds |
+| 7 | Real ground truth | PASS | 22 sources fetched with URL, revision, licence, size and SHA-256 in `tests/upstream/MANIFEST.json`; lens b's own resolver agreed with every count on GitHub's descriptions |
+| 8 | Real e2e incl. PyPI upgrade | PASS | `RESTFUL_CHECKER_E2E=1`: archive contents, installed wheel by subprocess, upgrade in place from PyPI 3.1.1, suite from the sdist (lens d, reviewer) |
+| 9 | Seeded fuzz, no crash, hang or blow-up | PASS | seeded fuzz and linear-time contracts in the suite; lens c: 11,000 fuzz cases and 23 scaling generators, all linear after the fixes |
+| 10 | Every interpreter | PASS | 3.8.20, 3.9.25, 3.10.19, 3.11.5, 3.12.12, 3.13.2, 3.14.2 and 3.14.2 free-threaded from the installed wheel |
+| 11 | README | PASS | `twine check --strict`; absolute links; problem, verified why (Spectral, Redocly CLI, vacuum checked on GitHub), install, quick start, GUIDE and CHANGELOG links |
+| 12 | CHANGELOG dated | PASS | `## [3.2.0] - 2026-10-15` with the stable surface and every change |
+| 13 | pyproject | accepted deviation, pending the maintainer | 3.2.0, Production/Stable, 3.8 to 3.14, MIT, the four URLs, keywords; runtime dependencies PyYAML and requests kept (see Decisions) |
+| 14 | sdist and wheel contents | PASS | wheel: package, `py.typed`, stylesheet, LICENSE; sdist: source, tests, manifest, scripts, README, CHANGELOG, GUIDE, LICENSE; no fetched third-party file |
+| 15 | Gates exit 0 alone | PASS | `ruff format --check .`, `ruff check .`, `mypy --strict restful_checker tests`, `pytest` |
+| 16 | Independent reviewer | PASS | three rounds, the last under the bounded criterion |
+| 17 | PR, trace guard | ready | PR #2 from `release/3.2.0`, trace guard CLEAN; merge and publish left to the maintainer |
+| 18 | Mutation round | PASS | author 50 (41 killed, 1 equivalent, 8 closed), lens e 199 blind (151 killed, 3 equivalent, 45 closed), reviewer 80 (69 killed, 11 closed) |
+| 19 | Five QA lenses | PASS | a (round 2), b (round 4), c (round 2), d (round 1), e (round 1) |
+
+## Behaviour changes against PyPI 3.1.1
+
+CHANGELOG 3.2.0 lists each one; lenses a and d compared both versions on the real and
+edge documents and traced every difference to a line there. The owner's decisions move
+verdicts on purpose (methods, ranges, problem details, binary bodies, pagination names,
+servers and schemes, schema examples, versions, verbs); messages are plain text; the JSON
+report is built from data; deep, malformed and over-expanding documents raise
+`ValueError`; remote downloads are bounded and never print credentials; Python 3.8+ and no
+`beautifulsoup4`.
 
 ## Ground truth (item 7)
 
@@ -136,6 +170,7 @@ time; heavy runs went to the second build machine under a turn.
 | --- | --- | --- | --- |
 | 1 | 2a46f5c | FAIL (items 6, 11, 13, 16, 18) | 40 mutations of its own on the code changed since `main`: 34 killed, 6 survived (an unresolved lone server, an unclosed `filter[`, `const` as a type, runs of capitals split per letter, operation parameters and request-body media types outside the expansion count); its contracts added in `tests/test_contract_review.py`. `tests/test_cli.py` over 200 lines (split into `tests/test_cli_help.py`); the command's JSON rewrite not atomic (now `write_atomically`); no GUIDE (GUIDE.md added and linked); runtime dependencies (recorded below) |
 | 2 | 5950247 | FAIL (items 6 and 18) | every round-1 finding confirmed fixed; one fresh sweep of 40 (S01 to S40), 35 killed, 5 survived (a nested output folder not created, a Filters section for routes without GET, a quoted charset, schemes with digits or `+`, a capital followed by a digit), closed by `tests/test_contract_review_2.py`; one GUIDE sentence on grouping corrected and pinned by `tests/test_docs.py`; item 13 judged an acceptable deviation that needs the maintainer's acceptance |
+| 3 | f7a6530 | PASS | the five round-2 survivors confirmed killed, the GUIDE fix confirmed, gates green; 80 reviewer mutations over two rounds, 11 survivors all closed by `tests/test_contract_review.py` and `tests/test_contract_review_2.py` |
 
 ## Decisions for the maintainer
 
