@@ -2,6 +2,8 @@
 
 # RESTful API Checker
 
+[![Lianes8 Certified](https://lianes8studio.com/certified/lianes8-certified-badge.svg)](https://lianes8studio.com/certified)
+
 [![PyPI version](https://img.shields.io/pypi/v/restful-checker?color=blue&label=PyPI)](https://pypi.org/project/restful-checker/)
 [![Python](https://img.shields.io/pypi/pyversions/restful-checker?color=green)](https://pypi.org/project/restful-checker/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/JaviLianes8/restful-checker/blob/main/LICENSE)
