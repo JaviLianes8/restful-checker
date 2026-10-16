@@ -27,11 +27,13 @@ def safe_url(url: str) -> str:
     try:
         parts = urlsplit(url)
         host = parts.hostname or ""
+        if ":" in host:
+            host = f"[{host}]"  # an IPv6 address keeps its brackets
         if parts.port is not None:
             host = f"{host}:{parts.port}"
     except ValueError:  # a malformed port or bracket
         return "<the given URL>"
-    return urlunsplit((parts.scheme, host, parts.path, "", ""))
+    return urlunsplit((parts.scheme, host, parts.path.split(";", 1)[0], "", ""))
 
 
 def _download(url: str, box: dict[str, Any]) -> None:

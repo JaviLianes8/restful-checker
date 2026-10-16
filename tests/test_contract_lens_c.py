@@ -153,3 +153,39 @@ def test_checks_accept_keys_of_any_type() -> None:
     paths: dict[Any, Any] = {None: {}, 3: {}, "/v1/{userId}": {}}
     assert check_param_consistency(paths)[1] == 1.0
     assert check_http_methods("/v1/x", {None, 3})[1] == pytest.approx(0.6)  # type: ignore[arg-type]
+
+
+def test_operation_parameters_and_request_bodies_count_toward_the_limit(tmp_path: Path) -> None:
+    doc = document({f"/p{i}": {"$ref": "#/x/item"} for i in range(250)})
+    params = [{"name": f"q{i}", "in": "query"} for i in range(250)]
+    body: dict[str, Any] = {"content": {f"application/x{i}+json": {} for i in range(250)}}
+    doc["x"] = {"item": {"get": {"parameters": params, "requestBody": body}}}
+    with pytest.raises(ValueError, match="expands to more than"):
+        analyze_api(write_json(tmp_path, doc), tmp_path / "o")
+
+
+def test_shared_server_lists_are_read_once() -> None:
+    from restful_checker.checks.server_levels import nested_lists
+
+    servers = [{"url": "http://a"}]
+    doc = {"paths": {f"/p{i}": {"get": {"$ref": "#/x/op"}} for i in range(1000)},
+           "x": {"op": {"servers": servers}}}  # fmt: skip
+    assert nested_lists(doc, "servers") == [servers]
+
+
+def test_safe_url_keeps_ipv6_brackets_and_drops_path_parameters() -> None:
+    assert cli_remote.safe_url("http://[::1]:8080/x;jsessionid=S") == "http://[::1]:8080/x"
+
+
+def test_a_failed_write_leaves_no_temporary_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from restful_checker.report import html_report
+
+    def broken(source: object, target: object) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr("os.replace", broken)
+    with pytest.raises(OSError, match="disk full"):
+        html_report.generate_html([], 100, output=tmp_path / "r.html")
+    assert list(tmp_path.iterdir()) == []

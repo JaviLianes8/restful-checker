@@ -31,12 +31,14 @@ def nested_lists(document: Any, field: str) -> list[list[Any]]:
     if not isinstance(paths, dict):
         return []
     lists: list[list[Any]] = []
+    seen: set[int] = set()  # a list shared through references is read once
     for path, item in paths.items():
         item = resolve(item, document)
         if not isinstance(path, str) or not path.startswith("/") or not isinstance(item, dict):
             continue
         for node in [item, *_operations(item, document)]:
             value = node.get(field) if isinstance(node, dict) else None
-            if isinstance(value, list) and value:
+            if isinstance(value, list) and value and id(value) not in seen:
+                seen.add(id(value))
                 lists.append(value)
     return lists

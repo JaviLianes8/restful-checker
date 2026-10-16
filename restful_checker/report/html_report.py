@@ -131,8 +131,12 @@ def _write(path: Path, text: str) -> None:
     # Written whole or not at all: a failing run never leaves a truncated report behind.
     # A lone surrogate (possible in JSON input) is written as its escape, not refused.
     temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(text, encoding="utf-8", errors="backslashreplace")
-    os.replace(temporary, path)
+    try:
+        temporary.write_text(text, encoding="utf-8", errors="backslashreplace")
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
 
 
 def write_reports(

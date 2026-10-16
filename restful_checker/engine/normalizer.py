@@ -86,7 +86,11 @@ def _operation(
     if "requestBody" in operation:
         result["requestBody"] = _with_content(operation["requestBody"], root)
     responses = resolve(operation.get("responses"), root)
-    _spend(budget, 1 + len(shared) + (len(responses) if isinstance(responses, dict) else 0))
+    body = result.get("requestBody")
+    content = body.get("content") if isinstance(body, dict) else None
+    counted = len(responses) if isinstance(responses, dict) else 0
+    counted += len(content) if isinstance(content, dict) else 0
+    _spend(budget, 1 + len(result.get("parameters") or []) + counted)
     if isinstance(responses, dict):
         result["responses"] = {
             str(code): _with_content(response, root) for code, response in responses.items()
